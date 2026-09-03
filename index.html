@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Teaching Web Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Math Learning Hub</h1>
+            <p>Learn and practice fundamental math concepts</p>
+        </header>
+
+        <main>
+            <section class="topic" id="addition">
+                <h2>Addition</h2>
+                <p>Addition is combining two or more numbers to find their total.</p>
+                <div class="example">
+                    <p><strong>Example:</strong> 5 + 3 = 8</p>
+                </div>
+                <div class="practice">
+                    <input type="number" id="addNum1" placeholder="First number" value="0">
+                    <span>+</span>
+                    <input type="number" id="addNum2" placeholder="Second number" value="0">
+                    <span>=</span>
+                    <input type="number" id="addResult" placeholder="Result" readonly>
+                    <button onclick="calculateAddition()">Calculate</button>
+                </div>
+            </section>
+
+            <section class="topic" id="subtraction">
+                <h2>Subtraction</h2>
+                <p>Subtraction is taking away one number from another.</p>
+                <div class="example">
+                    <p><strong>Example:</strong> 10 - 4 = 6</p>
+                </div>
+                <div class="practice">
+                    <input type="number" id="subNum1" placeholder="First number" value="0">
+                    <span>-</span>
+                    <input type="number" id="subNum2" placeholder="Second number" value="0">
+                    <span>=</span>
+                    <input type="number" id="subResult" placeholder="Result" readonly>
+                    <button onclick="calculateSubtraction()">Calculate</button>
+                </div>
+            </section>
+
+            <section class="topic" id="multiplication">
+                <h2>Multiplication</h2>
+                <p>Multiplication is repeated addition of a number.</p>
+                <div class="example">
+                    <p><strong>Example:</strong> 6 × 7 = 42</p>
+                </div>
+                <div class="practice">
+                    <input type="number" id="mulNum1" placeholder="First number" value="0">
+                    <span>×</span>
+                    <input type="number" id="mulNum2" placeholder="Second number" value="0">
+                    <span>=</span>
+                    <input type="number" id="mulResult" placeholder="Result" readonly>
+                    <button onclick="calculateMultiplication()">Calculate</button>
+                </div>
+            </section>
+
+            <section class="topic" id="division">
+                <h2>Division</h2>
+                <p>Division is splitting a number into equal parts.</p>
+                <div class="example">
+                    <p><strong>Example:</strong> 20 ÷ 4 = 5</p>
+                </div>
+                <div class="practice">
+                    <input type="number" id="divNum1" placeholder="Dividend" value="0">
+                    <span>÷</span>
+                    <input type="number" id="divNum2" placeholder="Divisor" value="1">
+                    <span>=</span>
+                    <input type="number" id="divResult" placeholder="Result" readonly>
+                    <button onclick="calculateDivision()">Calculate</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Math Learning Hub | Learn Mathematics Made Easy</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

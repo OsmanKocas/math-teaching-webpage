@@ -1,0 +1,173 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+header p {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+main {
+    padding: 40px 20px;
+}
+
+.topic {
+    margin-bottom: 40px;
+    padding: 25px;
+    border: 2px solid #f0f0f0;
+    border-radius: 10px;
+    background: #f9f9f9;
+    transition: all 0.3s ease;
+}
+
+.topic:hover {
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+}
+
+.topic h2 {
+    color: #667eea;
+    margin-bottom: 10px;
+    font-size: 1.8em;
+}
+
+.topic p {
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.6;
+    font-size: 1.05em;
+}
+
+.example {
+    background: white;
+    padding: 15px;
+    border-left: 4px solid #764ba2;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.example p {
+    color: #764ba2;
+    font-weight: 500;
+    margin: 0;
+}
+
+.practice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.practice input {
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    width: 120px;
+    transition: border-color 0.3s ease;
+}
+
+.practice input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.practice input[readonly] {
+    background: #f0f0f0;
+    color: #667eea;
+    font-weight: bold;
+}
+
+.practice span {
+    font-weight: bold;
+    color: #667eea;
+    font-size: 1.2em;
+}
+
+.practice button {
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.practice button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.practice button:active {
+    transform: translateY(0);
+}
+
+footer {
+    background: #f0f0f0;
+    color: #666;
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid #ddd;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2em;
+    }
+
+    .topic {
+        padding: 15px;
+    }
+
+    .practice input {
+        width: 100px;
+        padding: 10px;
+    }
+
+    .practice button {
+        padding: 10px 20px;
+    }
+}
