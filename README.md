@@ -1,51 +1,70 @@
-# 🔢 Math Teaching Webpage
+# Grumbo Counts
 
-A simple, interactive web page designed for teaching fundamental math concepts including addition, subtraction, multiplication, and division.
+A talking counting game for kids aged roughly 3 to 5, built for phones.
+No reading required — every instruction is spoken aloud.
 
-## Features
+Single HTML file, no build step, no dependencies, no server code.
 
-- **Interactive Learning**: Each math operation has its own section with explanations and examples
-- **Practice Calculators**: Interactive input fields where users can practice each operation
-- **User-Friendly Design**: Clean, modern interface with a gradient color scheme
-- **Responsive Layout**: Works seamlessly on desktop and mobile devices
-- **Real-time Calculations**: Instant results as you input numbers
+## The three games
 
-## Math Topics Covered
-
-1. **Addition** - Learn how to combine numbers
-2. **Subtraction** - Learn how to take away numbers
-3. **Multiplication** - Learn how to multiply numbers
-4. **Division** - Learn how to divide numbers
-
-## Getting Started
-
-1. Clone this repository
-2. Open `index.html` in your web browser
-3. Start learning and practicing!
-
-## How to Use
-
-- Enter numbers in the input fields for each operation
-- Click the "Calculate" button or press Enter to see the result
-- The result will appear in the output field
+| Game | What it teaches |
+|---|---|
+| **How many?** | Subitizing and numeral recognition. Snacks appear, the kid taps the matching number, then the game counts each item aloud. |
+| **Feed me** | One-to-one correspondence. A number appears; the kid taps exactly that many snacks, each one counted aloud as it's eaten. |
+| **Which is more?** | Quantity comparison, no numerals involved. |
 
 ## Files
 
-- `index.html` - Main HTML structure
-- `styles.css` - Styling and responsive design
-- `script.js` - JavaScript functionality for calculations
-- `README.md` - Documentation
+```
+index.html            the whole game
+manifest.json         makes it installable to the home screen
+apple-touch-icon.png  iOS home-screen icon (180px)
+icon-192.png          Android / PWA icon
+icon-512.png          Android / PWA icon, maskable
+```
 
-## Technologies Used
+## Putting it on GitHub Pages
 
-- HTML5
-- CSS3
-- JavaScript (Vanilla)
+1. Go to your repository on github.com
+2. **Add file → Upload files**
+3. Drag in all five files (or select them from Files on iPhone)
+4. **Commit changes**
+5. Settings → Pages → Source: *Deploy from a branch*, branch `main`, folder `/ (root)` → Save
+6. Wait a minute, then open `https://yourname.github.io/your-repo-name/`
 
-## License
+All five files go in the same folder, at the top level of the repo. If you
+put `index.html` in a subfolder, the icon and manifest paths will break.
 
-This project is open source and available under the MIT License.
+## Getting it onto the home screen
 
-## Contributing
+Open the URL in Safari → Share → **Add to Home Screen**. It launches
+fullscreen with the Grumbo icon and no address bar.
 
-Feel free to fork this repository and submit pull requests with improvements!
+**Check the ringer switch.** iOS mutes speech synthesis when the phone is on
+silent, and without the voice a pre-reader can't play at all.
+
+## Tuning it
+
+Everything worth changing is near the top of the `<script>` block:
+
+- `var ROUND = 5;` — stars per round. Five is about ninety seconds, which is
+  roughly a three-year-old's attention span. Raise it for older kids.
+- `u.rate = opts.rate || 0.82;` — speech speed. Lower is slower.
+- `u.pitch = opts.pitch || 1.25;` — monster voice pitch.
+- The `SNACKS` array holds four inline SVG drawings. Add a fifth by appending
+  another string of SVG shapes drawn on a 64×64 grid.
+- Colours are CSS variables at the very top of the `<style>` block.
+
+In `turnFeed()`, `Math.min(state.max, 6)` caps how many items the monster can
+ask for — counting past six by touch gets frustrating on a small screen.
+
+## Notes
+
+- Speech uses the browser's built-in `speechSynthesis`. Voice quality varies
+  by device; iOS voices are noticeably better than most Android ones.
+- Sound effects are generated with the Web Audio API, so there are no audio
+  files to load.
+- Respects `prefers-reduced-motion`.
+- There is no failure state anywhere in the game. A wrong tap wiggles and
+  lets the kid try again. This is deliberate — at this age a lose condition
+  ends the session.
