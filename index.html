@@ -42,17 +42,30 @@
 
   .stage{
     width:100%;max-width:460px;
-    display:flex;flex-direction:column;gap:16px;
-    padding:calc(env(safe-area-inset-top) + 22px) 16px calc(env(safe-area-inset-bottom) + 20px);
+    display:flex;flex-direction:column;gap:14px;
+    padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 20px);
   }
 
+  .head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex:none}
+
   .wordmark{
-    font-size:clamp(38px,12vw,52px);
+    font-size:clamp(36px,11.5vw,50px);
     font-weight:700;line-height:.88;letter-spacing:-.02em;
     margin:0;color:var(--lime);text-shadow:5px 5px 0 var(--ink);
-    flex:none;
   }
   .wordmark span{display:block;color:var(--pink)}
+
+  .lang{
+    flex:none;margin-top:6px;
+    display:flex;border:3px solid rgba(255,244,224,.22);
+    border-radius:14px;overflow:hidden;
+  }
+  .lang button{
+    font-family:inherit;font-size:13px;font-weight:700;letter-spacing:.04em;
+    background:none;border:none;color:rgba(255,244,224,.55);
+    padding:8px 11px;cursor:pointer;
+  }
+  .lang button[aria-pressed="true"]{background:var(--tangerine);color:var(--ink)}
 
   .doors{display:flex;flex-direction:column;gap:16px;flex:1;justify-content:center;min-height:0}
 
@@ -66,9 +79,9 @@
     transition:transform .07s ease, box-shadow .07s ease;
   }
   .door:active{transform:translateY(7px);box-shadow:0 0 0 var(--ink)}
-  .door svg{width:92px;height:92px;flex:none}
-  .door h2{margin:0;font-size:26px;font-weight:700;line-height:1.05}
-  .door p{margin:5px 0 0;font-size:14.5px;font-weight:500;color:rgba(255,244,224,.6);line-height:1.35}
+  .door svg{width:88px;height:88px;flex:none}
+  .door h2{margin:0;font-size:25px;font-weight:700;line-height:1.05}
+  .door p{margin:5px 0 0;font-size:14px;font-weight:500;color:rgba(255,244,224,.6);line-height:1.35}
   .door .age{
     display:inline-block;margin-top:8px;
     font-size:12.5px;font-weight:600;letter-spacing:.05em;
@@ -77,10 +90,7 @@
   .door.little .age{background:var(--pink);color:var(--ink)}
   .door.big .age{background:var(--sky);color:var(--ink)}
 
-  .foot{
-    text-align:center;font-size:13px;font-weight:500;
-    color:rgba(255,244,224,.32);flex:none;
-  }
+  .foot{text-align:center;font-size:13px;font-weight:500;color:rgba(255,244,224,.32);flex:none;margin:0}
 
   @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
   .door.little svg{animation:float 3.2s ease-in-out infinite}
@@ -92,11 +102,17 @@
 <body>
 <div class="stage">
 
-  <h1 class="wordmark">Monster<span>Maths</span></h1>
+  <div class="head">
+    <h1 class="wordmark" id="wordmark"></h1>
+    <div class="lang">
+      <button data-l="en" aria-pressed="false">EN</button>
+      <button data-l="tr" aria-pressed="false">TR</button>
+    </div>
+  </div>
 
   <div class="doors">
 
-    <a class="door little" href="count.html">
+    <a class="door little" id="doorCount" href="count.html">
       <svg viewBox="0 0 120 120">
         <ellipse cx="60" cy="112" rx="32" ry="5" fill="rgba(0,0,0,.28)"/>
         <path d="M24 62c0-22 16-38 36-38s36 16 36 38v18c0 12-16 20-36 20s-36-8-36-20z"
@@ -112,12 +128,12 @@
       </svg>
       <div>
         <h2>Grumbo</h2>
-        <p>Counting, sharing and spotting which pile is bigger. Talks out loud.</p>
-        <span class="age">AGES 3–5</span>
+        <p class="blurb"></p>
+        <span class="age"></span>
       </div>
     </a>
 
-    <a class="door big" href="math.html">
+    <a class="door big" id="doorMath" href="math.html">
       <svg viewBox="0 0 120 120">
         <ellipse cx="60" cy="112" rx="32" ry="5" fill="rgba(0,0,0,.28)"/>
         <path d="M22 58c0-20 17-34 38-34s38 14 38 34v22c0 11-17 18-38 18s-38-7-38-18z"
@@ -131,14 +147,82 @@
       </svg>
       <div>
         <h2>Zizzo</h2>
-        <p>Add, take away, times and share &mdash; each one drawn as a picture so it makes sense.</p>
-        <span class="age">AGES 5–9</span>
+        <p class="blurb"></p>
+        <span class="age"></span>
       </div>
     </a>
 
   </div>
 
-  <p class="foot">Pick a monster</p>
+  <p class="foot" id="foot"></p>
 </div>
+
+<script>
+(function(){
+"use strict";
+
+var LANG = (function(){
+  var q = new URLSearchParams(location.search).get("lang");
+  if (q === "tr" || q === "en") return q;
+  return /^tr/i.test(navigator.language || "") ? "tr" : "en";
+})();
+
+var STR = {
+  en: {
+    title:"Monster", title2:"Maths",
+    countBlurb:"Counting, sharing and spotting which pile is bigger. Talks out loud.",
+    countAge:"AGES 3\u20135",
+    mathBlurb:"Add, take away, times and share \u2014 each one drawn as a picture so it makes sense.",
+    mathAge:"AGES 5\u20139",
+    foot:"Pick a monster"
+  },
+  tr: {
+    title:"Canavar", title2:"Matematik",
+    countBlurb:"Sayma, paylaşma ve hangi yığında daha çok olduğunu bulma. Sesli konuşur.",
+    countAge:"3\u20135 YAŞ",
+    mathBlurb:"Topla, çıkar, çarp ve böl \u2014 hepsi anlaşılsın diye resimle anlatılır.",
+    mathAge:"5\u20139 YAŞ",
+    foot:"Bir canavar seç"
+  }
+};
+
+function paint(){
+  var T = STR[LANG];
+  document.documentElement.lang = LANG;
+
+  document.getElementById("wordmark").innerHTML =
+    T.title + "<span>" + T.title2 + "</span>";
+
+  var blurbs = document.querySelectorAll(".blurb");
+  var ages   = document.querySelectorAll(".age");
+  blurbs[0].textContent = T.countBlurb;
+  ages[0].textContent   = T.countAge;
+  blurbs[1].textContent = T.mathBlurb;
+  ages[1].textContent   = T.mathAge;
+  document.getElementById("foot").textContent = T.foot;
+
+  document.getElementById("doorCount").href = "count.html?lang=" + LANG;
+  document.getElementById("doorMath").href  = "math.html?lang="  + LANG;
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll(".lang button"),
+    function(b){ b.setAttribute("aria-pressed", b.dataset.l === LANG); }
+  );
+}
+
+Array.prototype.forEach.call(
+  document.querySelectorAll(".lang button"),
+  function(b){
+    b.addEventListener("click", function(){
+      LANG = b.dataset.l;
+      history.replaceState(null, "", "?lang=" + LANG);
+      paint();
+    });
+  }
+);
+
+paint();
+})();
+</script>
 </body>
 </html>

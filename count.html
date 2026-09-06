@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
-<title>Grumbo Counts &mdash; Counting</title>
+<title>Grumbo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
@@ -215,7 +215,9 @@
         <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z" fill="#FFF4E0"/></svg>
       </button>
       <div></div>
-      <div style="width:44px"></div>
+      <button class="home" id="langBtn" aria-label="Language">
+        <span id="langTag" style="font-size:14px;font-weight:700;color:#FFF4E0"></span>
+      </button>
     </div>
 
     <div class="modes">
@@ -308,8 +310,49 @@
    ============================================================ */
 
 var ROUND = 5;
-var WORDS = ["zero","one","two","three","four","five",
-             "six","seven","eight","nine","ten"];
+/* ---------------- Language ----------------
+   Chosen by ?lang= in the URL, otherwise from the device. */
+var LANG = (function(){
+  var q = new URLSearchParams(location.search).get("lang");
+  if (q === "tr" || q === "en") return q;
+  return /^tr/i.test(navigator.language || "") ? "tr" : "en";
+})();
+document.documentElement.lang = LANG;
+
+var STR = {
+  en: {
+    voiceTag:"en", bcp:"en-US",
+    words:["zero","one","two","three","four","five",
+           "six","seven","eight","nine","ten"],
+    ask:"How many?",
+    give:"Give me {n}!",
+    which:"Which one has more?",
+    more:"More!",
+    pickGame:"Pick a game!",
+    finished:"You did it! Hooray!",
+    retry:["Try again","Hmm, look again","Have another go"],
+    cheers:["Yes!","Yum!","Well done!","That's it!","Good job!","Delicious!"],
+    modes:["How many?","Feed me","Which is more?"]
+  },
+  tr: {
+    voiceTag:"tr", bcp:"tr-TR",
+    words:["sıfır","bir","iki","üç","dört","beş",
+           "altı","yedi","sekiz","dokuz","on"],
+    ask:"Kaç tane?",
+    give:"Bana {n} tane ver!",
+    which:"Hangisinde daha çok var?",
+    more:"Daha çok!",
+    pickGame:"Bir oyun seç!",
+    finished:"Başardın! Yaşasın!",
+    retry:["Tekrar dene","Hmm, tekrar bak","Bir daha dene"],
+    cheers:["Evet!","Mmm!","Aferin!","İşte bu!","Çok güzel!","Nefis!"],
+    modes:["Kaç tane?","Beni doyur","Hangisi daha çok?"]
+  }
+};
+var T = STR[LANG];
+var WORDS = T.words;
+
+function withLang(page){ return page + "?lang=" + LANG; }
 
 var state = { mode:"count", max:5, target:0, got:0, step:0, busy:false, prompt:"" };
 
@@ -337,8 +380,9 @@ function chooseVoice(){
   if (!("speechSynthesis" in window)) return;
   var all = speechSynthesis.getVoices();
   if (!all.length) return;
-  voice = all.filter(function(v){ return /^en/i.test(v.lang) && v.localService; })[0]
-       || all.filter(function(v){ return /^en/i.test(v.lang); })[0]
+  var want = new RegExp("^" + T.voiceTag, "i");
+  voice = all.filter(function(v){ return want.test(v.lang) && v.localService; })[0]
+       || all.filter(function(v){ return want.test(v.lang); })[0]
        || all[0];
 }
 if ("speechSynthesis" in window){
@@ -352,6 +396,7 @@ function say(text, opts){
     if (opts.interrupt !== false) speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(text);
     if (voice) u.voice = voice;
+    u.lang  = T.bcp;
     u.rate  = opts.rate  || 0.82;
     u.pitch = opts.pitch || 1.25;
     u.volume = 1;
@@ -499,7 +544,7 @@ function turnCount(){
     b.addEventListener("click", function(){ pickNumber(Number(b.dataset.v), b); });
   });
 
-  state.prompt = "How many?";
+  state.prompt = T.ask;
   setTimeout(function(){ say(state.prompt); }, 420);
 }
 
@@ -549,7 +594,7 @@ function turnFeed(){
   $("controls").innerHTML =
     '<div class="target"><div class="bignum">'+n+'</div><div class="tally" id="tally">'+tally+'</div></div>';
 
-  state.prompt = "Give me " + WORDS[n] + "!";
+  state.prompt = T.give.replace("{n}", WORDS[n]);
   setTimeout(function(){ say(state.prompt); }, 420);
 }
 
@@ -602,7 +647,7 @@ function turnMore(){
   });
 
   $("controls").innerHTML = "";
-  state.prompt = "Which one has more?";
+  state.prompt = T.which;
   setTimeout(function(){ say(state.prompt); }, 420);
 }
 
@@ -611,7 +656,7 @@ function pickHalf(idx, node){
   if (idx !== state.target){ nudge(node, "half"); return; }
   state.busy = true;
   node.classList.add("win");
-  say("More!");
+  say(T.more);
   blip(660,.16);
   setTimeout(win, 950);
 }
@@ -623,7 +668,7 @@ function nudge(node, kind){
   $("bay").className = "bay hmm";
   setMonster($("monster"), "hmm");
   blip(220, .2);
-  say(pick(["Try again","Hmm, look again","Have another go"]));
+  say(pick(T.retry));
   setTimeout(function(){
     $("bay").className = "bay";
     setMonster($("monster"), "idle");
@@ -631,7 +676,7 @@ function nudge(node, kind){
 }
 
 /* ---- Winning a turn ---- */
-var CHEERS = ["Yes!","Yum!","Well done!","That's it!","Good job!","Delicious!"];
+var CHEERS = T.cheers;
 function win(){
   state.step++;
   paintStars();
@@ -655,7 +700,7 @@ function party(){
   [523,659,784,1047].forEach(function(f,i){
     setTimeout(function(){ blip(f,.22); }, i*140);
   });
-  setTimeout(function(){ say("You did it! Hooray!", { rate:.9 }); }, 700);
+  setTimeout(function(){ say(T.finished, { rate:.9 }); }, 700);
 }
 
 /* ============================================================
@@ -668,7 +713,7 @@ $("play").addEventListener("click", function(){
   primeVoice();
   blip(660,.15);
   show("s-modes");
-  setTimeout(function(){ say("Pick a game!"); }, 300);
+  setTimeout(function(){ say(T.pickGame); }, 300);
 });
 
 $("s-modes").addEventListener("click", function(e){
@@ -688,7 +733,17 @@ $("homeBtn").addEventListener("click", function(){
   if ("speechSynthesis" in window) speechSynthesis.cancel();
   show("s-modes");
 });
-$("homeFromModes").addEventListener("click", function(){ location.href = "index.html"; });
+$("homeFromModes").addEventListener("click", function(){ location.href = withLang("index.html"); });
+
+/* paint the translated labels */
+(function(){
+  var names = document.querySelectorAll(".mode-name");
+  T.modes.forEach(function(txt,i){ if (names[i]) names[i].textContent = txt; });
+  $("langTag").textContent = LANG === "tr" ? "EN" : "TR";
+  $("langBtn").addEventListener("click", function(){
+    location.href = "count.html?lang=" + (LANG === "tr" ? "en" : "tr");
+  });
+})();
 $("repeat").addEventListener("click", function(){ say(state.prompt); });
 $("againBtn").addEventListener("click", function(){ startRound(state.mode); });
 

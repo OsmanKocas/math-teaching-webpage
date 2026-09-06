@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
-<title>Zizzo's Maths</title>
+<title>Zizzo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
@@ -238,7 +238,10 @@
       <button class="iconbtn" id="toHub" aria-label="Back">
         <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z" fill="#FFF4E0"/></svg>
       </button>
-      <div></div><div style="width:44px"></div>
+      <div></div>
+      <button class="iconbtn" id="langBtn" aria-label="Language">
+        <span id="langTag" style="font-size:14px;font-weight:700">EN</span>
+      </button>
     </div>
 
     <div class="setup">
@@ -352,6 +355,70 @@
    ============================================================ */
 
 var ROUND = 10;
+/* ---------------- Language ---------------- */
+var LANG = (function(){
+  var q = new URLSearchParams(location.search).get("lang");
+  if (q === "tr" || q === "en") return q;
+  return /^tr/i.test(navigator.language || "") ? "tr" : "en";
+})();
+document.documentElement.lang = LANG;
+
+var STR = {
+  en: {
+    skill:"Choose a skill",
+    ops:[["Adding","put together"],["Taking away","what's left"],
+         ["Times","rows of things"],["Sharing","fair plates"]],
+    size:"How big?",
+    tiers:[["Small","to 10"],["Medium","to 20"],["Big","to 100"]],
+    pics:"Pictures",
+    aids:[["Show me","see the why"],["Hide them","numbers only"]],
+    veil:"tap the eye to see it",
+    good:["Nice.","Got it.","Yes!","Correct.","Sharp."],
+    late:"Right — worth another look later.",
+    miss1:"Not quite — look at the picture.",
+    miss2:"Count them carefully.",
+    miss3:"The answer is {n}.",
+    outOf:"out of {n} first time",
+    clean:"Clean sweep. Try the next size up.",
+    practise:"Worth practising",
+    again:"Go again",
+    other:"Pick something else",
+    mAdd:"{a} and {b} put together",
+    mSub:"take {b} away from {a}",
+    mMul:"{a} rows of {b}",
+    mDiv:"{a} shared onto {b} plates"
+  },
+  tr: {
+    skill:"Bir konu seç",
+    ops:[["Toplama","bir araya getir"],["Çıkarma","geriye ne kalır"],
+         ["Çarpma","sıra sıra"],["Bölme","eşit paylaş"]],
+    size:"Ne kadar büyük?",
+    tiers:[["Küçük","10'a kadar"],["Orta","20'ye kadar"],["Büyük","100'e kadar"]],
+    pics:"Resimler",
+    aids:[["Göster","nedenini gör"],["Gizle","sadece sayılar"]],
+    veil:"görmek için göze dokun",
+    good:["Güzel.","Buldun.","Evet!","Doğru.","Tam isabet."],
+    late:"Doğru — buna sonra tekrar bak.",
+    miss1:"Olmadı — resme bak.",
+    miss2:"Dikkatlice say.",
+    miss3:"Cevap {n}.",
+    outOf:"{n} soruda ilk denemede",
+    clean:"Hepsi doğru! Bir üst seviyeyi dene.",
+    practise:"Tekrar çalışılacaklar",
+    again:"Tekrar oyna",
+    other:"Başka bir şey seç",
+    mAdd:"{a} ile {b} bir arada",
+    mSub:"{a} sayısından {b} çıkar",
+    mMul:"{a} sıra, her sırada {b} tane",
+    mDiv:"{a} tane, {b} tabağa paylaştırıldı"
+  }
+};
+var T = STR[LANG];
+
+function fill(tpl, vals){
+  return tpl.replace(/\{(\w+)\}/g, function(_, k){ return vals[k]; });
+}
+function withLang(page){ return page + "?lang=" + LANG; }
 
 var state = {
   op:"+", tier:1, aid:true,
@@ -442,7 +509,7 @@ function drawModel(q){
 
   if (q.op === "+"){
     if (tooMany(q.a + q.b)){
-      inner.innerHTML = summary(q.a + " and " + q.b + " put together");
+      inner.innerHTML = summary(fill(T.mAdd, { a:q.a, b:q.b }));
       return;
     }
     inner.innerHTML =
@@ -453,7 +520,7 @@ function drawModel(q){
 
   else if (q.op === "−"){
     if (tooMany(q.a)){
-      inner.innerHTML = summary("take " + q.b + " away from " + q.a);
+      inner.innerHTML = summary(fill(T.mSub, { a:q.a, b:q.b }));
       return;
     }
     inner.innerHTML =
@@ -462,7 +529,7 @@ function drawModel(q){
 
   else if (q.op === "×"){
     if (tooMany(q.a * q.b)){
-      inner.innerHTML = summary(q.a + " rows of " + q.b);
+      inner.innerHTML = summary(fill(T.mMul, { a:q.a, b:q.b }));
       return;
     }
     var rows = "";
@@ -472,7 +539,7 @@ function drawModel(q){
 
   else {
     if (tooMany(q.a) || q.b > 8){
-      inner.innerHTML = summary(q.a + " shared onto " + q.b + " plates");
+      inner.innerHTML = summary(fill(T.mDiv, { a:q.a, b:q.b }));
       return;
     }
     var plates = "";
@@ -557,9 +624,7 @@ function check(){
     if (firstGo) state.right++;
     else state.missed.push(state.q);
 
-    $("note").textContent = firstGo
-      ? pick(["Nice.","Got it.","Yes!","Correct.","Sharp."])
-      : "Right — worth another look later.";
+    $("note").textContent = firstGo ? pick(T.good) : T.late;
     state.step++;
     drawPips();
     setTimeout(newTurn, 1050);
@@ -579,13 +644,13 @@ function check(){
 
   $("note").classList.add("bad");
   if (state.tries === 1){
-    $("note").textContent = "Not quite — look at the picture.";
+    $("note").textContent = T.miss1;
     state.aid = true;
     $("model").classList.remove("hidden");
   } else if (state.tries === 2){
-    $("note").textContent = "Count them carefully.";
+    $("note").textContent = T.miss2;
   } else {
-    $("note").textContent = "The answer is " + state.q.ans + ".";
+    $("note").textContent = fill(T.miss3, { n:state.q.ans });
     state.locked = true;
     state.marks[state.step] = false;
     state.missed.push(state.q);
@@ -597,11 +662,12 @@ function check(){
 
 /* ---------------- Results ---------------- */
 function finish(){
-  $("score").innerHTML = state.right + '<small>out of ' + ROUND + ' first time</small>';
+  $("score").innerHTML = state.right
+    + '<small>' + fill(T.outOf, { n:ROUND }) + '</small>';
 
   var box = $("review");
   if (!state.missed.length){
-    box.innerHTML = '<p>Clean sweep. Try the next size up.</p>';
+    box.innerHTML = '<p>' + T.clean + '</p>';
   } else {
     var seen = {}, rows = "";
     state.missed.forEach(function(q){
@@ -611,7 +677,7 @@ function finish(){
       rows += '<div class="fact"><span>' + q.a + ' ' + q.op + ' ' + q.b
             + '</span><b>' + q.ans + '</b></div>';
     });
-    box.innerHTML = '<p>Worth practising</p>' + rows;
+    box.innerHTML = '<p>' + T.practise + '</p>' + rows;
   }
   show("s-done");
 }
@@ -673,7 +739,32 @@ document.addEventListener("keydown", function(e){
 
 $("quit").addEventListener("click", function(){ show("s-setup"); });
 $("quit2").addEventListener("click", function(){ show("s-setup"); });
-$("toHub").addEventListener("click", function(){ location.href = "index.html"; });
+$("toHub").addEventListener("click", function(){ location.href = withLang("index.html"); });
+
+/* paint every translated label once, before first paint */
+(function(){
+  var labels = document.querySelectorAll(".label");
+  [T.skill, T.size, T.pics].forEach(function(t,i){ if (labels[i]) labels[i].textContent = t; });
+
+  document.querySelectorAll("#ops .txt").forEach(function(node,i){
+    node.innerHTML = T.ops[i][0] + "<small>" + T.ops[i][1] + "</small>";
+  });
+  document.querySelectorAll("#tiers .tier").forEach(function(node,i){
+    node.innerHTML = T.tiers[i][0] + "<small>" + T.tiers[i][1] + "</small>";
+  });
+  document.querySelectorAll("#aids .tier").forEach(function(node,i){
+    node.innerHTML = T.aids[i][0] + "<small>" + T.aids[i][1] + "</small>";
+  });
+
+  document.querySelector(".veil").textContent = T.veil;
+  $("again").textContent  = T.again;
+  $("switch").textContent = T.other;
+
+  $("langTag").textContent = LANG === "tr" ? "EN" : "TR";
+  $("langBtn").addEventListener("click", function(){
+    location.href = "math.html?lang=" + (LANG === "tr" ? "en" : "tr");
+  });
+})();
 $("again").addEventListener("click", begin);
 $("switch").addEventListener("click", function(){ show("s-setup"); });
 })();
