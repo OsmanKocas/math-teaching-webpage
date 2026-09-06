@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Zizzo">
+<meta name="theme-color" content="#2E1A47">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Zizzo's Maths</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --grape:#2E1A47;
+    --lime:#C6F135;
+    --pink:#FF5CA8;
+    --tangerine:#FF9F1C;
+    --sky:#4CC9F0;
+    --cream:#FFF4E0;
+    --ink:#160C24;
+    --accent:var(--lime);
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+  html,body{height:100%;overflow:hidden}
+
+  body{
+    margin:0;
+    font-family:'Fredoka',system-ui,-apple-system,sans-serif;
+    background:var(--grape);
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(76,201,240,.18), transparent 46%),
+      radial-gradient(circle at 85% 88%, rgba(255,92,168,.16), transparent 48%);
+    color:var(--cream);
+    display:flex;justify-content:center;
+    touch-action:manipulation;
+  }
+
+  .stage{
+    width:100%;max-width:460px;
+    display:flex;flex-direction:column;
+    padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 12px);
+  }
+
+  .screen{display:none;flex-direction:column;flex:1;gap:12px;min-height:0}
+  .screen.on{display:flex}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;height:44px;flex:none}
+  .iconbtn{
+    width:44px;height:44px;border-radius:50%;border:none;
+    background:rgba(255,244,224,.13);display:grid;place-items:center;cursor:pointer;
+  }
+  .iconbtn svg{width:22px;height:22px}
+  .iconbtn:active{transform:scale(.92)}
+
+  /* ============ SETUP ============ */
+  .setup{display:flex;flex-direction:column;gap:14px;flex:1;justify-content:center;min-height:0}
+  .label{font-size:14px;font-weight:600;color:rgba(255,244,224,.55);margin:0 0 8px 4px;letter-spacing:.04em;text-transform:uppercase}
+
+  .ops{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .op{
+    background:rgba(255,244,224,.08);
+    border:5px solid var(--ink);border-radius:24px;
+    box-shadow:0 6px 0 var(--ink);
+    padding:14px 12px;cursor:pointer;
+    display:flex;align-items:center;gap:12px;
+  }
+  .op:active{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
+  .op .sym{
+    width:52px;height:52px;flex:none;border-radius:16px;
+    border:4px solid var(--ink);
+    display:grid;place-items:center;
+    font-size:34px;font-weight:700;color:var(--ink);
+  }
+  .op .txt{font-size:17px;font-weight:600;line-height:1.15}
+  .op .txt small{display:block;font-size:12.5px;font-weight:500;color:rgba(255,244,224,.5);margin-top:2px}
+  .op[data-op="+"] .sym{background:var(--lime)}
+  .op[data-op="−"] .sym{background:var(--pink)}
+  .op[data-op="×"] .sym{background:var(--sky)}
+  .op[data-op="÷"] .sym{background:var(--tangerine)}
+
+  .tiers{display:flex;gap:10px}
+  .tier{
+    flex:1;background:rgba(255,244,224,.08);
+    border:4px solid rgba(255,244,224,.22);border-radius:18px;
+    padding:12px 6px;text-align:center;cursor:pointer;
+    font-size:15px;font-weight:600;color:var(--cream);
+  }
+  .tier small{display:block;font-size:12px;font-weight:500;opacity:.6;margin-top:3px}
+  .tier[aria-pressed="true"]{
+    background:var(--tangerine);color:var(--ink);
+    border-color:var(--ink);box-shadow:0 5px 0 var(--ink);
+  }
+  .tier[aria-pressed="true"] small{opacity:.75}
+
+  /* ============ PLAY ============ */
+  .pips{display:flex;gap:5px}
+  .pip{width:10px;height:10px;border-radius:50%;background:rgba(255,244,224,.2)}
+  .pip.hit{background:var(--lime)}
+  .pip.miss{background:var(--pink)}
+  .pip.now{background:var(--cream);transform:scale(1.35)}
+
+  .sum{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    font-size:clamp(34px,10.5vw,46px);font-weight:700;flex:none;
+  }
+  .sum .o{color:var(--accent)}
+  .slot{
+    min-width:88px;height:64px;padding:0 10px;
+    border-radius:18px;border:4px dashed rgba(255,244,224,.35);
+    display:grid;place-items:center;
+    color:var(--cream);
+  }
+  .slot.filled{border-style:solid;border-color:var(--accent);background:rgba(255,244,224,.08)}
+  .slot.good{background:var(--lime);color:var(--ink);border-color:var(--ink);animation:pop .4s ease}
+  .slot.bad{animation:shake .4s ease;border-color:var(--pink)}
+  @keyframes pop{0%{transform:scale(.5)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+
+  /* the picture that explains the sum */
+  .model{
+    flex:1;min-height:0;
+    background:rgba(0,0,0,.2);border-radius:24px;
+    padding:12px;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;position:relative;
+  }
+  .model.hidden .inner{opacity:0;transform:scale(.94)}
+  .inner{
+    display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+    transition:opacity .25s ease, transform .25s ease;width:100%;
+  }
+  .veil{
+    position:absolute;inset:0;display:grid;place-items:center;
+    font-size:15px;font-weight:600;color:rgba(255,244,224,.4);
+    pointer-events:none;opacity:0;transition:opacity .25s ease;
+  }
+  .model.hidden .veil{opacity:1}
+
+  .group{
+    display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:7px;
+    padding:9px;border-radius:16px;background:rgba(255,244,224,.07);
+    max-width:44%;
+  }
+  .dot{
+    width:19px;height:19px;border-radius:50%;
+    background:var(--accent);border:3px solid var(--ink);
+    display:block;animation:seed .3s ease backwards;
+  }
+  .dot.gone{background:transparent;border-style:dashed;border-color:rgba(255,244,224,.3);position:relative}
+  .dot.gone::after{
+    content:"";position:absolute;inset:-5px;
+    background:linear-gradient(45deg,transparent 44%,var(--pink) 44%,var(--pink) 56%,transparent 56%);
+  }
+  @keyframes seed{from{transform:scale(0);opacity:0}}
+
+  .joiner{font-size:30px;font-weight:700;color:rgba(255,244,224,.5)}
+
+  .array{display:flex;flex-direction:column;gap:7px;align-items:center}
+  .arow{display:flex;gap:7px}
+
+  .plates{display:flex;gap:9px;flex-wrap:wrap;justify-content:center}
+  .plate{
+    border:4px dashed rgba(255,244,224,.32);border-radius:50%;
+    padding:8px;min-width:56px;min-height:56px;
+    display:flex;flex-wrap:wrap;gap:5px;align-content:center;justify-content:center;
+  }
+  .plate .dot{width:15px;height:15px;border-width:2.5px}
+
+  /* keypad */
+  .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:none}
+  .key{
+    font-family:inherit;font-size:27px;font-weight:700;
+    background:rgba(255,244,224,.1);color:var(--cream);
+    border:3px solid rgba(255,244,224,.2);border-radius:16px;
+    padding:13px 0;cursor:pointer;
+  }
+  .key:active{background:rgba(255,244,224,.24);transform:scale(.95)}
+  .key.act{background:var(--accent);color:var(--ink);border-color:var(--ink);box-shadow:0 4px 0 var(--ink)}
+  .key.act:active{transform:translateY(4px);box-shadow:0 0 0 var(--ink)}
+  .key svg{width:26px;height:26px;display:block;margin:0 auto}
+
+  .note{text-align:center;font-size:16px;font-weight:600;min-height:22px;color:var(--accent);flex:none}
+  .note.bad{color:var(--pink)}
+
+  /* ============ RESULTS ============ */
+  .done{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;min-height:0}
+  .big{
+    font-size:clamp(60px,20vw,88px);font-weight:700;line-height:1;text-align:center;
+    color:var(--lime);text-shadow:5px 5px 0 var(--ink);margin:0;
+  }
+  .big small{display:block;font-size:17px;font-weight:500;color:rgba(255,244,224,.6);text-shadow:none;margin-top:10px}
+  .again{
+    font-family:inherit;font-size:22px;font-weight:700;
+    background:var(--lime);color:var(--ink);
+    border:5px solid var(--ink);border-radius:20px;
+    box-shadow:0 6px 0 var(--ink);padding:16px;cursor:pointer;width:100%;
+  }
+  .again:active{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
+  .ghost{
+    font-family:inherit;font-size:17px;font-weight:600;
+    background:none;color:rgba(255,244,224,.65);
+    border:3px solid rgba(255,244,224,.22);border-radius:18px;
+    padding:13px;cursor:pointer;width:100%;
+  }
+  .review{
+    background:rgba(0,0,0,.2);border-radius:20px;padding:14px;
+    max-height:30vh;overflow-y:auto;
+  }
+  .review p{margin:0 0 8px;font-size:13px;font-weight:600;color:rgba(255,244,224,.5)}
+  .fact{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:21px;font-weight:600;padding:7px 4px;
+    border-bottom:2px solid rgba(255,244,224,.08);
+  }
+  .fact:last-child{border-bottom:none}
+  .fact b{color:var(--lime)}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+  @media (max-height:680px){
+    .dot{width:16px;height:16px;border-width:2.5px}
+    .key{font-size:24px;padding:10px 0}
+    .slot{height:56px}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- ===== SETUP ===== -->
+  <section class="screen on" id="s-setup">
+    <div class="topbar">
+      <button class="iconbtn" id="toHub" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z" fill="#FFF4E0"/></svg>
+      </button>
+      <div></div><div style="width:44px"></div>
+    </div>
+
+    <div class="setup">
+      <div>
+        <p class="label">Choose a skill</p>
+        <div class="ops" id="ops">
+          <div class="op" data-op="+" role="button">
+            <div class="sym">+</div>
+            <div class="txt">Adding<small>put together</small></div>
+          </div>
+          <div class="op" data-op="−" role="button">
+            <div class="sym">−</div>
+            <div class="txt">Taking away<small>what's left</small></div>
+          </div>
+          <div class="op" data-op="×" role="button">
+            <div class="sym">×</div>
+            <div class="txt">Times<small>rows of things</small></div>
+          </div>
+          <div class="op" data-op="÷" role="button">
+            <div class="sym">÷</div>
+            <div class="txt">Sharing<small>fair plates</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="label">How big?</p>
+        <div class="tiers" id="tiers">
+          <div class="tier" data-tier="1" aria-pressed="true" role="button">Small<small>to 10</small></div>
+          <div class="tier" data-tier="2" aria-pressed="false" role="button">Medium<small>to 20</small></div>
+          <div class="tier" data-tier="3" aria-pressed="false" role="button">Big<small>to 100</small></div>
+        </div>
+      </div>
+
+      <div>
+        <p class="label">Pictures</p>
+        <div class="tiers" id="aids">
+          <div class="tier" data-aid="1" aria-pressed="true" role="button">Show me<small>see the why</small></div>
+          <div class="tier" data-aid="0" aria-pressed="false" role="button">Hide them<small>numbers only</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PLAY ===== -->
+  <section class="screen" id="s-play">
+    <div class="topbar">
+      <button class="iconbtn" id="quit" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="#FFF4E0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="pips" id="pips"></div>
+      <button class="iconbtn" id="peek" aria-label="Show or hide the picture">
+        <svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" fill="none" stroke="#FFF4E0" stroke-width="2.2"/><circle cx="12" cy="12" r="3" fill="#FFF4E0"/></svg>
+      </button>
+    </div>
+
+    <div class="sum" id="sum"></div>
+
+    <div class="model" id="model">
+      <div class="inner" id="inner"></div>
+      <div class="veil">tap the eye to see it</div>
+    </div>
+
+    <p class="note" id="note"></p>
+
+    <div class="pad" id="pad">
+      <button class="key" data-k="1">1</button>
+      <button class="key" data-k="2">2</button>
+      <button class="key" data-k="3">3</button>
+      <button class="key" data-k="4">4</button>
+      <button class="key" data-k="5">5</button>
+      <button class="key" data-k="6">6</button>
+      <button class="key" data-k="7">7</button>
+      <button class="key" data-k="8">8</button>
+      <button class="key" data-k="9">9</button>
+      <button class="key" data-k="del" aria-label="Delete">
+        <svg viewBox="0 0 24 24"><path d="M9 5h11a1 1 0 011 1v12a1 1 0 01-1 1H9l-6-7z" fill="none" stroke="#FFF4E0" stroke-width="2.2" stroke-linejoin="round"/><path d="M13 10l5 4M18 10l-5 4" stroke="#FFF4E0" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="key" data-k="0">0</button>
+      <button class="key act" data-k="go" aria-label="Check">
+        <svg viewBox="0 0 24 24"><path d="M4 12.5l6 6 10-13" fill="none" stroke="#160C24" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ===== RESULTS ===== -->
+  <section class="screen" id="s-done">
+    <div class="topbar">
+      <button class="iconbtn" id="quit2" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="#FFF4E0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div></div><div style="width:44px"></div>
+    </div>
+    <div class="done">
+      <p class="big" id="score"></p>
+      <div class="review" id="review"></div>
+      <button class="again" id="again">Go again</button>
+      <button class="ghost" id="switch">Pick something else</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   Zizzo's Maths — the four operations, each with a picture
+   that shows why the answer is the answer.
+   ============================================================ */
+
+var ROUND = 10;
+
+var state = {
+  op:"+", tier:1, aid:true,
+  q:null, entry:"", step:0, right:0,
+  marks:[], missed:[], locked:false, tries:0
+};
+
+function $(id){ return document.getElementById(id); }
+function rand(lo,hi){ return Math.floor(Math.random()*(hi-lo+1))+lo; }
+function pick(a){ return a[rand(0,a.length-1)]; }
+function show(id){
+  ["s-setup","s-play","s-done"].forEach(function(s){
+    $(s).classList.toggle("on", s===id);
+  });
+}
+
+var ACCENT = { "+":"var(--lime)", "−":"var(--pink)", "×":"var(--sky)", "÷":"var(--tangerine)" };
+
+/* ---------------- Sound ---------------- */
+var actx=null;
+function blip(f,d){
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    d = d || .15;
+    var o=actx.createOscillator(), g=actx.createGain();
+    o.type="sine"; o.frequency.value=f;
+    g.gain.setValueAtTime(.001, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.18, actx.currentTime+.01);
+    g.gain.exponentialRampToValueAtTime(.001, actx.currentTime+d);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime+d+.02);
+  }catch(e){}
+}
+
+/* ---------------- Question generation ---------------- */
+function makeQuestion(){
+  var op = state.op, t = state.tier, a, b, ans;
+
+  if (op === "+"){
+    var cap = t===1 ? 10 : t===2 ? 20 : 100;
+    a = rand(1, cap-1);
+    b = rand(1, Math.max(1, cap-a));
+    ans = a+b;
+  }
+  else if (op === "−"){
+    var cap2 = t===1 ? 10 : t===2 ? 20 : 100;
+    a = rand(2, cap2);
+    b = rand(1, a);              // never negative
+    ans = a-b;
+  }
+  else if (op === "×"){
+    var top = t===1 ? 5 : t===2 ? 10 : 12;
+    a = rand(2, top);
+    b = rand(2, top);
+    ans = a*b;
+  }
+  else {                          // ÷ always exact
+    var d  = rand(2, t===1 ? 5 : t===2 ? 10 : 12);
+    var q2 = rand(2, t===1 ? 5 : t===2 ? 10 : 12);
+    a = d*q2; b = d; ans = q2;
+  }
+  return { a:a, b:b, op:op, ans:ans };
+}
+
+/* ---------------- The pictures ----------------
+   Each operation gets the visual model that actually
+   makes it click:
+     +  two groups pushed together
+     −  a group with some crossed out
+     ×  a rectangular array (rows of columns)
+     ÷  a total shared onto equal plates
+   Big numbers fall back to a compact summary so we
+   never try to draw 96 dots on a phone.               */
+
+function dots(n, cls){
+  var s = "";
+  for (var i=0;i<n;i++){
+    s += '<i class="dot '+(cls||"")+'" style="animation-delay:'+(i*0.022)+'s"></i>';
+  }
+  return s;
+}
+
+function tooMany(n){ return n > 40; }
+
+function drawModel(q){
+  var inner = $("inner");
+
+  if (q.op === "+"){
+    if (tooMany(q.a + q.b)){
+      inner.innerHTML = summary(q.a + " and " + q.b + " put together");
+      return;
+    }
+    inner.innerHTML =
+      '<div class="group">'+dots(q.a)+'</div>' +
+      '<div class="joiner">+</div>' +
+      '<div class="group">'+dots(q.b)+'</div>';
+  }
+
+  else if (q.op === "−"){
+    if (tooMany(q.a)){
+      inner.innerHTML = summary("take " + q.b + " away from " + q.a);
+      return;
+    }
+    inner.innerHTML =
+      '<div class="group">' + dots(q.a - q.b) + dots(q.b, "gone") + '</div>';
+  }
+
+  else if (q.op === "×"){
+    if (tooMany(q.a * q.b)){
+      inner.innerHTML = summary(q.a + " rows of " + q.b);
+      return;
+    }
+    var rows = "";
+    for (var r=0;r<q.a;r++) rows += '<div class="arow">'+dots(q.b)+'</div>';
+    inner.innerHTML = '<div class="array">'+rows+'</div>';
+  }
+
+  else {
+    if (tooMany(q.a) || q.b > 8){
+      inner.innerHTML = summary(q.a + " shared onto " + q.b + " plates");
+      return;
+    }
+    var plates = "";
+    for (var p=0;p<q.b;p++) plates += '<div class="plate">'+dots(q.ans)+'</div>';
+    inner.innerHTML = '<div class="plates">'+plates+'</div>';
+  }
+}
+
+function summary(text){
+  return '<div style="font-size:19px;font-weight:600;color:rgba(255,244,224,.6);'
+       + 'text-align:center;padding:0 14px;line-height:1.4">' + text + '</div>';
+}
+
+/* ---------------- Turn ---------------- */
+function newTurn(){
+  if (state.step >= ROUND){ finish(); return; }
+
+  state.q = makeQuestion();
+  state.entry = "";
+  state.locked = false;
+  state.tries = 0;
+
+  $("sum").innerHTML =
+      '<span>'+state.q.a+'</span>'
+    + '<span class="o">'+state.q.op+'</span>'
+    + '<span>'+state.q.b+'</span>'
+    + '<span class="o">=</span>'
+    + '<span class="slot" id="slot"></span>';
+
+  drawModel(state.q);
+  $("model").classList.toggle("hidden", !state.aid);
+  $("note").textContent = "";
+  $("note").classList.remove("bad");
+  drawPips();
+}
+
+function drawPips(){
+  var h = "";
+  for (var i=0;i<ROUND;i++){
+    var c = state.marks[i] === true ? " hit"
+          : state.marks[i] === false ? " miss"
+          : i === state.step ? " now" : "";
+    h += '<div class="pip'+c+'"></div>';
+  }
+  $("pips").innerHTML = h;
+}
+
+function typeKey(k){
+  if (state.locked) return;
+
+  if (k === "del"){
+    state.entry = state.entry.slice(0,-1);
+    blip(300,.07);
+  } else if (k === "go"){
+    if (state.entry === "") return;
+    check();
+    return;
+  } else {
+    if (state.entry.length >= 3) return;
+    if (state.entry === "0") state.entry = "";
+    state.entry += k;
+    blip(520 + Number(k)*22, .07);
+  }
+
+  var slot = $("slot");
+  slot.textContent = state.entry;
+  slot.classList.toggle("filled", state.entry !== "");
+}
+
+function check(){
+  var val = Number(state.entry);
+  var slot = $("slot");
+
+  if (val === state.q.ans){
+    state.locked = true;
+    slot.classList.add("good");
+    blip(680,.13);
+    setTimeout(function(){ blip(900,.18); }, 100);
+
+    var firstGo = state.tries === 0;
+    state.marks[state.step] = firstGo;
+    if (firstGo) state.right++;
+    else state.missed.push(state.q);
+
+    $("note").textContent = firstGo
+      ? pick(["Nice.","Got it.","Yes!","Correct.","Sharp."])
+      : "Right — worth another look later.";
+    state.step++;
+    drawPips();
+    setTimeout(newTurn, 1050);
+    return;
+  }
+
+  // wrong: show the picture, let them try again
+  state.tries++;
+  slot.classList.add("bad");
+  blip(200,.2);
+  setTimeout(function(){
+    slot.classList.remove("bad");
+    state.entry = "";
+    slot.textContent = "";
+    slot.classList.remove("filled");
+  }, 430);
+
+  $("note").classList.add("bad");
+  if (state.tries === 1){
+    $("note").textContent = "Not quite — look at the picture.";
+    state.aid = true;
+    $("model").classList.remove("hidden");
+  } else if (state.tries === 2){
+    $("note").textContent = "Count them carefully.";
+  } else {
+    $("note").textContent = "The answer is " + state.q.ans + ".";
+    state.locked = true;
+    state.marks[state.step] = false;
+    state.missed.push(state.q);
+    state.step++;
+    drawPips();
+    setTimeout(newTurn, 2000);
+  }
+}
+
+/* ---------------- Results ---------------- */
+function finish(){
+  $("score").innerHTML = state.right + '<small>out of ' + ROUND + ' first time</small>';
+
+  var box = $("review");
+  if (!state.missed.length){
+    box.innerHTML = '<p>Clean sweep. Try the next size up.</p>';
+  } else {
+    var seen = {}, rows = "";
+    state.missed.forEach(function(q){
+      var key = q.a + q.op + q.b;
+      if (seen[key]) return;
+      seen[key] = 1;
+      rows += '<div class="fact"><span>' + q.a + ' ' + q.op + ' ' + q.b
+            + '</span><b>' + q.ans + '</b></div>';
+    });
+    box.innerHTML = '<p>Worth practising</p>' + rows;
+  }
+  show("s-done");
+}
+
+function begin(){
+  state.step = 0; state.right = 0;
+  state.marks = []; state.missed = [];
+  document.documentElement.style.setProperty("--accent", ACCENT[state.op]);
+  show("s-play");
+  newTurn();
+}
+
+/* ---------------- Wiring ---------------- */
+$("ops").addEventListener("click", function(e){
+  var o = e.target.closest(".op");
+  if (!o) return;
+  state.op = o.dataset.op;
+  blip(560,.12);
+  begin();
+});
+
+$("tiers").addEventListener("click", function(e){
+  var t = e.target.closest(".tier");
+  if (!t) return;
+  state.tier = Number(t.dataset.tier);
+  Array.prototype.forEach.call($("tiers").children, function(x){
+    x.setAttribute("aria-pressed", x === t);
+  });
+  blip(480,.1);
+});
+
+$("aids").addEventListener("click", function(e){
+  var t = e.target.closest(".tier");
+  if (!t) return;
+  state.aid = t.dataset.aid === "1";
+  Array.prototype.forEach.call($("aids").children, function(x){
+    x.setAttribute("aria-pressed", x === t);
+  });
+  blip(480,.1);
+});
+
+$("pad").addEventListener("click", function(e){
+  var k = e.target.closest(".key");
+  if (k) typeKey(k.dataset.k);
+});
+
+$("peek").addEventListener("click", function(){
+  state.aid = !state.aid;
+  $("model").classList.toggle("hidden", !state.aid);
+  blip(state.aid ? 620 : 380, .1);
+});
+
+document.addEventListener("keydown", function(e){
+  if (!$("s-play").classList.contains("on")) return;
+  if (/^[0-9]$/.test(e.key)) typeKey(e.key);
+  else if (e.key === "Backspace") typeKey("del");
+  else if (e.key === "Enter") typeKey("go");
+});
+
+$("quit").addEventListener("click", function(){ show("s-setup"); });
+$("quit2").addEventListener("click", function(){ show("s-setup"); });
+$("toHub").addEventListener("click", function(){ location.href = "index.html"; });
+$("again").addEventListener("click", begin);
+$("switch").addEventListener("click", function(){ show("s-setup"); });
+})();
+</script>
+</body>
+</html>

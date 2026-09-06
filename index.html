@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Grumbo">
+<meta name="apple-mobile-web-app-title" content="Monster Maths">
 <meta name="theme-color" content="#2E1A47">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
-<title>Grumbo Counts</title>
+<title>Monster Maths</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
@@ -33,164 +33,58 @@
     font-family:'Fredoka',system-ui,-apple-system,sans-serif;
     background:var(--grape);
     background-image:
-      radial-gradient(circle at 20% 10%, rgba(255,159,28,.18), transparent 45%),
-      radial-gradient(circle at 80% 85%, rgba(76,201,240,.18), transparent 48%);
+      radial-gradient(circle at 18% 10%, rgba(255,159,28,.18), transparent 44%),
+      radial-gradient(circle at 82% 86%, rgba(76,201,240,.18), transparent 46%);
     color:var(--cream);
-    display:flex;
-    justify-content:center;
+    display:flex;justify-content:center;
     touch-action:manipulation;
   }
 
   .stage{
     width:100%;max-width:460px;
-    display:flex;flex-direction:column;
-    padding:
-      calc(env(safe-area-inset-top) + 10px) 14px
-      calc(env(safe-area-inset-bottom) + 14px);
+    display:flex;flex-direction:column;gap:16px;
+    padding:calc(env(safe-area-inset-top) + 22px) 16px calc(env(safe-area-inset-bottom) + 20px);
   }
 
-  .screen{display:none;flex-direction:column;flex:1;gap:12px}
-  .screen.on{display:flex}
-
-  /* ============ TITLE ============ */
-  .hero{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:14px}
-  #heroMonster{width:min(58vw,220px);height:min(58vw,220px);animation:breathe 3.4s ease-in-out infinite}
-  @keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.03)}}
-
-  .playbtn{
-    width:118px;height:118px;border-radius:50%;
-    background:var(--lime);border:6px solid var(--ink);
-    box-shadow:0 8px 0 var(--ink);
-    display:grid;place-items:center;cursor:pointer;
-    animation:pulse 1.9s ease-in-out infinite;
+  .wordmark{
+    font-size:clamp(38px,12vw,52px);
+    font-weight:700;line-height:.88;letter-spacing:-.02em;
+    margin:0;color:var(--lime);text-shadow:5px 5px 0 var(--ink);
+    flex:none;
   }
-  .playbtn:active{transform:translateY(8px);box-shadow:0 0 0 var(--ink);animation:none}
-  .playbtn svg{width:48px;height:48px;margin-left:8px}
-  @keyframes pulse{
-    0%,100%{box-shadow:0 8px 0 var(--ink)}
-    50%{box-shadow:0 8px 0 var(--ink),0 0 0 16px rgba(198,241,53,.16)}
-  }
+  .wordmark span{display:block;color:var(--pink)}
 
-  /* ============ MODE PICKER ============ */
-  .modes{display:flex;flex-direction:column;gap:14px;flex:1;justify-content:center}
-  .mode{
-    background:rgba(255,244,224,.09);
-    border:5px solid var(--ink);
-    border-radius:26px;
-    box-shadow:0 6px 0 var(--ink);
-    padding:16px;
+  .doors{display:flex;flex-direction:column;gap:16px;flex:1;justify-content:center;min-height:0}
+
+  .door{
     display:flex;align-items:center;gap:16px;
-    cursor:pointer;
-  }
-  .mode:active{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
-  .mode svg{width:76px;height:76px;flex:none}
-  .mode-name{font-size:26px;font-weight:700;color:var(--cream)}
-
-  .rangepick{display:flex;gap:12px;justify-content:center;padding-bottom:4px}
-  .range{
-    flex:1;
-    background:rgba(255,244,224,.09);
-    border:4px solid rgba(255,244,224,.25);
-    border-radius:20px;padding:12px;
-    display:flex;justify-content:center;gap:7px;align-items:center;flex-wrap:wrap;
-    cursor:pointer;
-  }
-  .range[aria-pressed="true"]{background:var(--tangerine);border-color:var(--ink);box-shadow:0 5px 0 var(--ink)}
-  .range i{width:13px;height:13px;border-radius:50%;background:var(--cream);display:block}
-  .range[aria-pressed="true"] i{background:var(--ink)}
-
-  /* ============ PLAY ============ */
-  .topbar{display:flex;align-items:center;justify-content:space-between;height:44px}
-  .home,.askbtn{
-    width:44px;height:44px;border-radius:50%;border:none;
-    background:rgba(255,244,224,.13);display:grid;place-items:center;cursor:pointer;
-  }
-  .home svg{width:22px;height:22px}
-  .askbtn svg{width:24px;height:24px}
-  .stars{display:flex;gap:6px}
-  .stars svg{width:26px;height:26px}
-  .stars .s{fill:rgba(255,244,224,.2)}
-  .stars .s.lit{fill:var(--tangerine);animation:pop .4s ease}
-  @keyframes pop{0%{transform:scale(.3)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
-
-  .tray{
-    background:rgba(0,0,0,.18);
-    border-radius:28px;
-    padding:14px;
-    display:flex;flex-wrap:wrap;align-content:center;justify-content:center;
-    gap:10px;
-    min-height:150px;
-    flex:1;
-  }
-  .tray.pair{gap:0;padding:0;background:none;flex-wrap:nowrap;align-items:stretch}
-  .half{
-    flex:1;margin:0 5px;
-    background:rgba(0,0,0,.18);border-radius:26px;
-    border:5px solid transparent;
-    display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:9px;
-    padding:12px;cursor:pointer;
-  }
-  .half:active{transform:scale(.97)}
-  .half.win{border-color:var(--lime);background:rgba(198,241,53,.16)}
-  .half.nope{animation:shake .4s ease}
-
-  .item{width:52px;height:52px;display:block}
-  .item.small{width:40px;height:40px}
-  .item.tap{cursor:pointer}
-  .item.counting{animation:bounce .45s ease}
-  .item.eaten{animation:vanish .4s ease forwards}
-  .item.arrive{animation:drop .35s ease backwards}
-  @keyframes bounce{0%,100%{transform:translateY(0) scale(1)}45%{transform:translateY(-16px) scale(1.22)}}
-  @keyframes vanish{to{transform:scale(0) rotate(35deg);opacity:0}}
-  @keyframes drop{from{transform:translateY(-26px) scale(.4);opacity:0}}
-
-  .bay{display:flex;justify-content:center;padding:2px 0}
-  #monster{width:104px;height:104px;display:block}
-  .bay.yay #monster{animation:hop .55s ease}
-  .bay.hmm #monster{animation:shake .45s ease}
-  @keyframes hop{0%,100%{transform:translateY(0)}35%{transform:translateY(-24px) rotate(-7deg)}65%{transform:translateY(-9px) rotate(5deg)}}
-  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
-
-  .choices{display:flex;gap:12px;justify-content:center}
-  .num{
-    flex:1;max-width:110px;aspect-ratio:1;
-    background:var(--cream);color:var(--ink);
-    border:5px solid var(--ink);border-radius:24px;
+    background:rgba(255,244,224,.08);
+    border:5px solid var(--ink);border-radius:28px;
     box-shadow:0 7px 0 var(--ink);
-    font-family:inherit;font-size:52px;font-weight:700;
-    display:grid;place-items:center;cursor:pointer;
+    padding:18px 16px;cursor:pointer;
+    text-decoration:none;color:inherit;
+    transition:transform .07s ease, box-shadow .07s ease;
   }
-  .num:active{transform:translateY(7px);box-shadow:0 0 0 var(--ink)}
-  .num.right{background:var(--lime);animation:pop .45s ease}
-  .num.nope{animation:shake .4s ease;background:rgba(255,244,224,.45)}
-
-  .target{display:flex;align-items:center;justify-content:center;gap:14px}
-  .bignum{
-    width:104px;height:104px;
-    background:var(--sky);color:var(--ink);
-    border:6px solid var(--ink);border-radius:26px;
-    box-shadow:0 7px 0 var(--ink);
-    font-size:62px;font-weight:700;
-    display:grid;place-items:center;
+  .door:active{transform:translateY(7px);box-shadow:0 0 0 var(--ink)}
+  .door svg{width:92px;height:92px;flex:none}
+  .door h2{margin:0;font-size:26px;font-weight:700;line-height:1.05}
+  .door p{margin:5px 0 0;font-size:14.5px;font-weight:500;color:rgba(255,244,224,.6);line-height:1.35}
+  .door .age{
+    display:inline-block;margin-top:8px;
+    font-size:12.5px;font-weight:600;letter-spacing:.05em;
+    padding:4px 10px;border-radius:20px;
   }
-  .tally{display:flex;gap:6px;flex-wrap:wrap;max-width:150px}
-  .tally i{width:16px;height:16px;border-radius:50%;background:rgba(255,244,224,.22);display:block}
-  .tally i.on{background:var(--lime);animation:pop .3s ease}
+  .door.little .age{background:var(--pink);color:var(--ink)}
+  .door.big .age{background:var(--sky);color:var(--ink)}
 
-  /* ============ CELEBRATE ============ */
-  .party{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
-  #partyMonster{width:min(52vw,200px);height:min(52vw,200px);animation:hop .6s ease 3}
-  .bigstars{display:flex;gap:10px}
-  .bigstars svg{width:46px;height:46px;fill:var(--tangerine)}
-  .bigstars svg:nth-child(1){animation:pop .5s ease .10s backwards}
-  .bigstars svg:nth-child(2){animation:pop .5s ease .25s backwards}
-  .bigstars svg:nth-child(3){animation:pop .5s ease .40s backwards}
-  .bigstars svg:nth-child(4){animation:pop .5s ease .55s backwards}
-  .bigstars svg:nth-child(5){animation:pop .5s ease .70s backwards}
+  .foot{
+    text-align:center;font-size:13px;font-weight:500;
+    color:rgba(255,244,224,.32);flex:none;
+  }
 
-  .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9}
-  .confetti b{position:absolute;width:11px;height:16px;border-radius:2px;animation:fall 1.5s linear forwards}
-  @keyframes fall{to{transform:translateY(105vh) rotate(560deg);opacity:.2}}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .door.little svg{animation:float 3.2s ease-in-out infinite}
+  .door.big svg{animation:float 3.2s ease-in-out .9s infinite}
 
   @media (prefers-reduced-motion:reduce){*{animation:none !important}}
 </style>
@@ -198,502 +92,53 @@
 <body>
 <div class="stage">
 
-  <!-- ===== TITLE ===== -->
-  <section class="screen on" id="s-title">
-    <div class="hero">
-      <svg id="heroMonster" viewBox="0 0 120 120"></svg>
-      <div class="playbtn" id="play" role="button" aria-label="Play">
-        <svg viewBox="0 0 24 24"><path d="M6 3l15 9-15 9z" fill="#160C24"/></svg>
+  <h1 class="wordmark">Monster<span>Maths</span></h1>
+
+  <div class="doors">
+
+    <a class="door little" href="count.html">
+      <svg viewBox="0 0 120 120">
+        <ellipse cx="60" cy="112" rx="32" ry="5" fill="rgba(0,0,0,.28)"/>
+        <path d="M24 62c0-22 16-38 36-38s36 16 36 38v18c0 12-16 20-36 20s-36-8-36-20z"
+              fill="#FF5CA8" stroke="#160C24" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M34 28l6 16M86 28l-6 16" stroke="#160C24" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="34" cy="25" r="6.5" fill="#C6F135" stroke="#160C24" stroke-width="4"/>
+        <circle cx="86" cy="25" r="6.5" fill="#C6F135" stroke="#160C24" stroke-width="4"/>
+        <circle cx="47" cy="58" r="12.5" fill="#FFF4E0" stroke="#160C24" stroke-width="4"/>
+        <circle cx="75" cy="58" r="12.5" fill="#FFF4E0" stroke="#160C24" stroke-width="4"/>
+        <circle cx="47" cy="60" r="5.5" fill="#160C24"/>
+        <circle cx="75" cy="60" r="5.5" fill="#160C24"/>
+        <path d="M44 78q16 16 32 0" fill="none" stroke="#160C24" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h2>Grumbo</h2>
+        <p>Counting, sharing and spotting which pile is bigger. Talks out loud.</p>
+        <span class="age">AGES 3–5</span>
       </div>
-    </div>
-  </section>
+    </a>
 
-  <!-- ===== MODE PICKER ===== -->
-  <section class="screen" id="s-modes">
-    <div class="topbar">
-      <button class="home" id="homeFromModes" aria-label="Back">
-        <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z" fill="#FFF4E0"/></svg>
-      </button>
-      <div></div>
-      <div style="width:44px"></div>
-    </div>
-
-    <div class="modes">
-      <div class="mode" data-mode="count" role="button" aria-label="How many">
-        <svg viewBox="0 0 100 100">
-          <circle cx="28" cy="34" r="13" fill="#FF5CA8" stroke="#160C24" stroke-width="4"/>
-          <circle cx="58" cy="34" r="13" fill="#FF5CA8" stroke="#160C24" stroke-width="4"/>
-          <circle cx="43" cy="62" r="13" fill="#FF5CA8" stroke="#160C24" stroke-width="4"/>
-          <text x="76" y="78" font-family="Fredoka,sans-serif" font-size="46" font-weight="700" fill="#C6F135">3</text>
-        </svg>
-        <div class="mode-name">How many?</div>
+    <a class="door big" href="math.html">
+      <svg viewBox="0 0 120 120">
+        <ellipse cx="60" cy="112" rx="32" ry="5" fill="rgba(0,0,0,.28)"/>
+        <path d="M22 58c0-20 17-34 38-34s38 14 38 34v22c0 11-17 18-38 18s-38-7-38-18z"
+              fill="#4CC9F0" stroke="#160C24" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M60 24V8" stroke="#160C24" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="60" cy="8" r="7" fill="#FF9F1C" stroke="#160C24" stroke-width="4"/>
+        <circle cx="60" cy="54" r="19" fill="#FFF4E0" stroke="#160C24" stroke-width="5"/>
+        <circle cx="60" cy="56" r="8" fill="#160C24"/>
+        <path d="M42 86h36" stroke="#160C24" stroke-width="5" stroke-linecap="round"/>
+        <path d="M50 86v7M60 86v7M70 86v7" stroke="#160C24" stroke-width="4.5" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h2>Zizzo</h2>
+        <p>Add, take away, times and share &mdash; each one drawn as a picture so it makes sense.</p>
+        <span class="age">AGES 5–9</span>
       </div>
+    </a>
 
-      <div class="mode" data-mode="feed" role="button" aria-label="Feed me">
-        <svg viewBox="0 0 100 100">
-          <rect x="8" y="26" width="42" height="42" rx="10" fill="#4CC9F0" stroke="#160C24" stroke-width="4"/>
-          <text x="20" y="59" font-family="Fredoka,sans-serif" font-size="32" font-weight="700" fill="#160C24">4</text>
-          <circle cx="68" cy="38" r="10" fill="#FF9F1C" stroke="#160C24" stroke-width="4"/>
-          <circle cx="88" cy="56" r="10" fill="#FF9F1C" stroke="#160C24" stroke-width="4"/>
-          <circle cx="66" cy="70" r="10" fill="#FF9F1C" stroke="#160C24" stroke-width="4"/>
-        </svg>
-        <div class="mode-name">Feed me</div>
-      </div>
+  </div>
 
-      <div class="mode" data-mode="more" role="button" aria-label="Which is more">
-        <svg viewBox="0 0 100 100">
-          <circle cx="22" cy="42" r="10" fill="#C6F135" stroke="#160C24" stroke-width="4"/>
-          <circle cx="22" cy="66" r="10" fill="#C6F135" stroke="#160C24" stroke-width="4"/>
-          <path d="M50 28v48" stroke="#FFF4E0" stroke-width="4" stroke-linecap="round" opacity=".35"/>
-          <circle cx="74" cy="28" r="10" fill="#FF5CA8" stroke="#160C24" stroke-width="4"/>
-          <circle cx="74" cy="52" r="10" fill="#FF5CA8" stroke="#160C24" stroke-width="4"/>
-          <circle cx="74" cy="76" r="10" fill="#FF5CA8" stroke="#160C24" stroke-width="4"/>
-        </svg>
-        <div class="mode-name">Which is more?</div>
-      </div>
-    </div>
-
-    <div class="rangepick" id="ranges">
-      <div class="range" data-max="5" aria-pressed="true" role="button" aria-label="Up to five">
-        <i></i><i></i><i></i><i></i><i></i>
-      </div>
-      <div class="range" data-max="10" aria-pressed="false" role="button" aria-label="Up to ten">
-        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== PLAY ===== -->
-  <section class="screen" id="s-play">
-    <div class="topbar">
-      <button class="home" id="homeBtn" aria-label="Back">
-        <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z" fill="#FFF4E0"/></svg>
-      </button>
-      <div class="stars" id="stars"></div>
-      <button class="askbtn" id="repeat" aria-label="Say it again">
-        <svg viewBox="0 0 24 24"><path d="M4 9h4l5-5v16l-5-5H4zM17 8a5 5 0 010 8" fill="none" stroke="#FFF4E0" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></svg>
-      </button>
-    </div>
-
-    <div class="bay" id="bay">
-      <svg id="monster" viewBox="0 0 120 120"></svg>
-    </div>
-
-    <div class="tray" id="tray"></div>
-
-    <div id="controls"></div>
-  </section>
-
-  <!-- ===== CELEBRATE ===== -->
-  <section class="screen" id="s-party">
-    <div class="party">
-      <svg id="partyMonster" viewBox="0 0 120 120"></svg>
-      <div class="bigstars" id="bigstars"></div>
-      <div class="playbtn" id="againBtn" role="button" aria-label="Play again">
-        <svg viewBox="0 0 24 24"><path d="M6 3l15 9-15 9z" fill="#160C24"/></svg>
-      </div>
-    </div>
-  </section>
-
+  <p class="foot">Pick a monster</p>
 </div>
-<div class="confetti" id="confetti"></div>
-
-<script>
-(function(){
-"use strict";
-
-/* ============================================================
-   Grumbo Counts — counting game for kids who can't read yet.
-   Every instruction is spoken. Nothing can be failed.
-   ============================================================ */
-
-var ROUND = 5;
-var WORDS = ["zero","one","two","three","four","five",
-             "six","seven","eight","nine","ten"];
-
-var state = { mode:"count", max:5, target:0, got:0, step:0, busy:false, prompt:"" };
-
-function $(id){ return document.getElementById(id); }
-var SCREENS = ["s-title","s-modes","s-play","s-party"];
-function show(id){ SCREENS.forEach(function(s){ $(s).classList.toggle("on", s===id); }); }
-function rand(lo,hi){ return Math.floor(Math.random()*(hi-lo+1))+lo; }
-function pick(a){ return a[rand(0,a.length-1)]; }
-
-/* ---------------- Voice ----------------
-   iOS blocks speech until a real user gesture, so the first tap
-   on the play button primes it with a silent utterance. */
-var voiceReady=false, voice=null;
-
-function primeVoice(){
-  if (voiceReady || !("speechSynthesis" in window)) return;
-  try{
-    var u = new SpeechSynthesisUtterance(" ");
-    u.volume = 0;
-    speechSynthesis.speak(u);
-    voiceReady = true;
-  }catch(e){}
-}
-function chooseVoice(){
-  if (!("speechSynthesis" in window)) return;
-  var all = speechSynthesis.getVoices();
-  if (!all.length) return;
-  voice = all.filter(function(v){ return /^en/i.test(v.lang) && v.localService; })[0]
-       || all.filter(function(v){ return /^en/i.test(v.lang); })[0]
-       || all[0];
-}
-if ("speechSynthesis" in window){
-  chooseVoice();
-  speechSynthesis.onvoiceschanged = chooseVoice;
-}
-function say(text, opts){
-  if (!("speechSynthesis" in window)) return;
-  opts = opts || {};
-  try{
-    if (opts.interrupt !== false) speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(text);
-    if (voice) u.voice = voice;
-    u.rate  = opts.rate  || 0.82;
-    u.pitch = opts.pitch || 1.25;
-    u.volume = 1;
-    speechSynthesis.speak(u);
-  }catch(e){}
-}
-
-/* ---------------- Blips ---------------- */
-var actx = null;
-function blip(freq, dur){
-  try{
-    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === "suspended") actx.resume();
-    dur = dur || .18;
-    var o = actx.createOscillator(), g = actx.createGain();
-    o.type = "sine"; o.frequency.value = freq;
-    g.gain.setValueAtTime(.001, actx.currentTime);
-    g.gain.exponentialRampToValueAtTime(.22, actx.currentTime + .01);
-    g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + dur);
-    o.connect(g); g.connect(actx.destination);
-    o.start(); o.stop(actx.currentTime + dur + .02);
-  }catch(e){}
-}
-
-/* ---------------- Monster ---------------- */
-function monsterSVG(mood){
-  var mouth = mood === "yay" ? "M40 78q20 22 40 0"
-            : mood === "hmm" ? "M46 88q14 -11 28 0"
-            : "M46 82q14 12 28 0";
-  var r = mood === "yay" ? 6.5 : mood === "hmm" ? 4 : 5.5;
-  return ''
-   + '<ellipse cx="60" cy="113" rx="33" ry="5.5" fill="rgba(0,0,0,.28)"/>'
-   + '<path d="M24 62c0-22 16-38 36-38s36 16 36 38v18c0 12-16 20-36 20s-36-8-36-20z" '
-   +   'fill="#FF5CA8" stroke="#160C24" stroke-width="5" stroke-linejoin="round"/>'
-   + '<path d="M34 28l6 16M86 28l-6 16" stroke="#160C24" stroke-width="5" stroke-linecap="round"/>'
-   + '<circle cx="34" cy="25" r="6.5" fill="#C6F135" stroke="#160C24" stroke-width="4"/>'
-   + '<circle cx="86" cy="25" r="6.5" fill="#C6F135" stroke="#160C24" stroke-width="4"/>'
-   + '<circle cx="47" cy="58" r="12.5" fill="#FFF4E0" stroke="#160C24" stroke-width="4"/>'
-   + '<circle cx="75" cy="58" r="12.5" fill="#FFF4E0" stroke="#160C24" stroke-width="4"/>'
-   + '<circle cx="47" cy="60" r="'+r+'" fill="#160C24"/>'
-   + '<circle cx="75" cy="60" r="'+r+'" fill="#160C24"/>'
-   + '<path d="'+mouth+'" fill="none" stroke="#160C24" stroke-width="5" stroke-linecap="round"/>';
-}
-function setMonster(el, mood){ el.innerHTML = monsterSVG(mood); }
-
-/* ---------------- Snacks ---------------- */
-var SNACKS = [
-  '<path d="M28 22c0-5 4-9 9-9 3 0 5 1.6 6 3.4 1-1.8 3-3.4 6-3.4 5 0 9 4 9 9 0 12-8 26-15 26S28 34 28 22z" fill="#FF5CA8" stroke="#160C24" stroke-width="4"/><path d="M43 15V7" stroke="#160C24" stroke-width="4" stroke-linecap="round"/>',
-  '<path d="M32 6l7 17 18 1-14 12 5 18-16-10-16 10 5-18L7 24l18-1z" fill="#FFD84D" stroke="#160C24" stroke-width="4" stroke-linejoin="round"/>',
-  '<circle cx="32" cy="38" r="19" fill="#4CC9F0" stroke="#160C24" stroke-width="4"/><path d="M32 19c0-6 5-10 10-11-1 6-4 10-10 11z" fill="#C6F135" stroke="#160C24" stroke-width="3.5"/>',
-  '<circle cx="32" cy="34" r="20" fill="#FF9F1C" stroke="#160C24" stroke-width="4"/><circle cx="26" cy="28" r="3.4" fill="#160C24"/><circle cx="38" cy="32" r="3.4" fill="#160C24"/><circle cx="29" cy="42" r="3.4" fill="#160C24"/>'
-];
-var snackIndex = 0;
-function snackSVG(cls){
-  return '<svg class="item '+(cls||"")+'" viewBox="0 0 64 64">'+SNACKS[snackIndex]+'</svg>';
-}
-
-/* ---------------- Stars ---------------- */
-var STAR_PATH = 'M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z';
-function drawStars(){
-  var out = "";
-  for (var i=0;i<ROUND;i++){
-    out += '<svg viewBox="0 0 24 24"><path class="s" d="'+STAR_PATH+'"/></svg>';
-  }
-  $("stars").innerHTML = out;
-  paintStars();
-}
-function paintStars(){
-  Array.prototype.forEach.call($("stars").querySelectorAll(".s"), function(s,i){
-    s.classList.toggle("lit", i < state.step);
-  });
-}
-
-/* ---------------- Confetti ---------------- */
-function confetti(){
-  var box = $("confetti"), colors = ["#C6F135","#FF5CA8","#FF9F1C","#4CC9F0","#FFF4E0"];
-  for (var i=0;i<34;i++){
-    var b = document.createElement("b");
-    b.style.left = rand(0,100) + "vw";
-    b.style.top = "-24px";
-    b.style.background = pick(colors);
-    b.style.animationDelay = (Math.random()*.35) + "s";
-    box.appendChild(b);
-  }
-  setTimeout(function(){ box.innerHTML = ""; }, 2200);
-}
-
-/* ============================================================
-   ROUND FLOW
-   ============================================================ */
-function startRound(mode){
-  state.mode = mode;
-  state.step = 0;
-  drawStars();
-  show("s-play");
-  nextTurn();
-}
-
-function nextTurn(){
-  if (state.step >= ROUND){ party(); return; }
-  state.busy = false;
-  $("bay").className = "bay";
-  setMonster($("monster"), "idle");
-  snackIndex = rand(0, SNACKS.length-1);
-
-  if (state.mode === "count") turnCount();
-  else if (state.mode === "feed") turnFeed();
-  else turnMore();
-}
-
-/* ---- Mode 1: How many? ---- */
-function turnCount(){
-  var n = rand(1, state.max);
-  state.target = n;
-
-  var tray = $("tray");
-  tray.className = "tray";
-  tray.innerHTML = "";
-  for (var i=0;i<n;i++){
-    tray.insertAdjacentHTML("beforeend", snackSVG(n>6 ? "small arrive" : "arrive"));
-  }
-  Array.prototype.forEach.call(tray.children, function(c,i){
-    c.style.animationDelay = (i*0.07)+"s";
-  });
-
-  var opts = [n], guard = 0;
-  while (opts.length < 3 && guard++ < 80){
-    var c = n + pick([-2,-1,1,2]);
-    if (c >= 1 && c <= state.max && opts.indexOf(c) === -1) opts.push(c);
-  }
-  var f = 1;
-  while (opts.length < 3 && f <= state.max){
-    if (opts.indexOf(f) === -1) opts.push(f);
-    f++;
-  }
-  for (var k=opts.length-1;k>0;k--){
-    var j = rand(0,k), t = opts[k]; opts[k] = opts[j]; opts[j] = t;
-  }
-
-  var html = '<div class="choices">';
-  opts.forEach(function(v){ html += '<button class="num" data-v="'+v+'">'+v+'</button>'; });
-  $("controls").innerHTML = html + '</div>';
-
-  Array.prototype.forEach.call($("controls").querySelectorAll(".num"), function(b){
-    b.addEventListener("click", function(){ pickNumber(Number(b.dataset.v), b); });
-  });
-
-  state.prompt = "How many?";
-  setTimeout(function(){ say(state.prompt); }, 420);
-}
-
-function pickNumber(v, btn){
-  if (state.busy) return;
-  if (v !== state.target){ nudge(btn, "num"); return; }
-  state.busy = true;
-  btn.classList.add("right");
-  countAloud(win);
-}
-
-/* The teaching moment: light each item, name its number. */
-function countAloud(done){
-  var items = $("tray").querySelectorAll(".item"), i = 0;
-  (function step(){
-    if (i >= items.length){ setTimeout(done, 420); return; }
-    var it = items[i];
-    it.classList.add("counting");
-    blip(440 + i*55, .16);
-    say(WORDS[i+1], { rate:.8 });
-    setTimeout(function(){ it.classList.remove("counting"); }, 450);
-    i++;
-    setTimeout(step, 620);
-  })();
-}
-
-/* ---- Mode 2: Feed me N ---- */
-function turnFeed(){
-  var n = rand(1, Math.min(state.max, 6));
-  state.target = n;
-  state.got = 0;
-
-  var tray = $("tray");
-  tray.className = "tray";
-  tray.innerHTML = "";
-  var pool = n + rand(2,4);
-  for (var i=0;i<pool;i++){
-    tray.insertAdjacentHTML("beforeend", snackSVG("tap arrive"));
-  }
-  Array.prototype.forEach.call(tray.children, function(c,i){
-    c.style.animationDelay = (i*0.05)+"s";
-    c.addEventListener("click", function(){ feedOne(c); });
-  });
-
-  var tally = "";
-  for (var t=0;t<n;t++) tally += "<i></i>";
-  $("controls").innerHTML =
-    '<div class="target"><div class="bignum">'+n+'</div><div class="tally" id="tally">'+tally+'</div></div>';
-
-  state.prompt = "Give me " + WORDS[n] + "!";
-  setTimeout(function(){ say(state.prompt); }, 420);
-}
-
-function feedOne(item){
-  if (state.busy || item.classList.contains("eaten")) return;
-  state.got++;
-  item.classList.add("eaten");
-  item.style.pointerEvents = "none";
-  blip(440 + state.got*60, .15);
-  say(WORDS[state.got], { rate:.85 });
-
-  var pips = $("tally").children;
-  if (pips[state.got-1]) pips[state.got-1].classList.add("on");
-
-  var bay = $("bay");
-  bay.className = "bay";
-  void bay.offsetWidth;
-  bay.className = "bay yay";
-  setMonster($("monster"), "yay");
-  setTimeout(function(){ setMonster($("monster"), "idle"); }, 500);
-
-  if (state.got >= state.target){
-    state.busy = true;
-    setTimeout(win, 950);
-  }
-}
-
-/* ---- Mode 3: Which is more? ---- */
-function turnMore(){
-  var a = rand(1, state.max), b, guard = 0;
-  do { b = rand(1, state.max); guard++; }
-  while (Math.abs(a-b) < 2 && guard < 60);
-  if (a === b) b = (a < state.max) ? a+1 : a-1;
-
-  state.target = (a > b) ? 0 : 1;
-
-  var tray = $("tray");
-  tray.className = "tray pair";
-  tray.innerHTML = '<div class="half" data-i="0"></div><div class="half" data-i="1"></div>';
-  var halves = tray.children;
-
-  [a,b].forEach(function(count, idx){
-    for (var i=0;i<count;i++){
-      halves[idx].insertAdjacentHTML("beforeend", snackSVG("small arrive"));
-    }
-    Array.prototype.forEach.call(halves[idx].children, function(c,i){
-      c.style.animationDelay = (i*0.05)+"s";
-    });
-    halves[idx].addEventListener("click", function(){ pickHalf(idx, halves[idx]); });
-  });
-
-  $("controls").innerHTML = "";
-  state.prompt = "Which one has more?";
-  setTimeout(function(){ say(state.prompt); }, 420);
-}
-
-function pickHalf(idx, node){
-  if (state.busy) return;
-  if (idx !== state.target){ nudge(node, "half"); return; }
-  state.busy = true;
-  node.classList.add("win");
-  say("More!");
-  blip(660,.16);
-  setTimeout(win, 950);
-}
-
-/* ---- Gentle wrong-answer: no penalty, just try again ---- */
-function nudge(node, kind){
-  node.classList.add("nope");
-  setTimeout(function(){ node.classList.remove("nope"); }, 430);
-  $("bay").className = "bay hmm";
-  setMonster($("monster"), "hmm");
-  blip(220, .2);
-  say(pick(["Try again","Hmm, look again","Have another go"]));
-  setTimeout(function(){
-    $("bay").className = "bay";
-    setMonster($("monster"), "idle");
-  }, 750);
-}
-
-/* ---- Winning a turn ---- */
-var CHEERS = ["Yes!","Yum!","Well done!","That's it!","Good job!","Delicious!"];
-function win(){
-  state.step++;
-  paintStars();
-  $("bay").className = "bay yay";
-  setMonster($("monster"), "yay");
-  blip(660,.14);
-  setTimeout(function(){ blip(880,.2); }, 110);
-  say(pick(CHEERS), { rate:.9 });
-  setTimeout(nextTurn, 1500);
-}
-
-function party(){
-  show("s-party");
-  setMonster($("partyMonster"), "yay");
-  var out = "";
-  for (var i=0;i<ROUND;i++){
-    out += '<svg viewBox="0 0 24 24"><path d="'+STAR_PATH+'"/></svg>';
-  }
-  $("bigstars").innerHTML = out;
-  confetti();
-  [523,659,784,1047].forEach(function(f,i){
-    setTimeout(function(){ blip(f,.22); }, i*140);
-  });
-  setTimeout(function(){ say("You did it! Hooray!", { rate:.9 }); }, 700);
-}
-
-/* ============================================================
-   WIRING
-   ============================================================ */
-setMonster($("heroMonster"), "idle");
-setMonster($("monster"), "idle");
-
-$("play").addEventListener("click", function(){
-  primeVoice();
-  blip(660,.15);
-  show("s-modes");
-  setTimeout(function(){ say("Pick a game!"); }, 300);
-});
-
-$("s-modes").addEventListener("click", function(e){
-  var m = e.target.closest(".mode");
-  if (m){ blip(560,.14); startRound(m.dataset.mode); return; }
-  var r = e.target.closest(".range");
-  if (r){
-    state.max = Number(r.dataset.max);
-    Array.prototype.forEach.call($("ranges").children, function(x){
-      x.setAttribute("aria-pressed", x === r);
-    });
-    blip(500,.12);
-  }
-});
-
-$("homeBtn").addEventListener("click", function(){
-  if ("speechSynthesis" in window) speechSynthesis.cancel();
-  show("s-modes");
-});
-$("homeFromModes").addEventListener("click", function(){ show("s-title"); });
-$("repeat").addEventListener("click", function(){ say(state.prompt); });
-$("againBtn").addEventListener("click", function(){ startRound(state.mode); });
-
-drawStars();
-})();
-</script>
 </body>
 </html>
