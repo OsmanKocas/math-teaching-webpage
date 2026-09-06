@@ -172,6 +172,56 @@
   }
   .plate .dot{width:15px;height:15px;border-width:2.5px}
 
+  /* ---- fractions ---- */
+  .ops .op.wide{grid-column:1 / -1}
+  .op[data-op="½"] .sym{background:#B892FF;font-size:27px}
+
+  .prompt{
+    text-align:center;font-size:15px;font-weight:600;
+    color:rgba(255,244,224,.55);min-height:20px;flex:none;margin:0;
+  }
+
+  .frac{
+    display:inline-flex;flex-direction:column;align-items:center;gap:3px;
+    vertical-align:middle;
+  }
+  .frac .fbar{
+    width:100%;height:4px;background:var(--cream);border-radius:2px;
+  }
+  .fslot{
+    min-width:66px;height:48px;padding:0 8px;
+    border-radius:12px;border:4px dashed rgba(255,244,224,.35);
+    display:grid;place-items:center;font-size:32px;font-weight:700;
+    color:var(--cream);cursor:pointer;
+  }
+  .fslot.fixed{border-style:solid;border-color:rgba(255,244,224,.22);cursor:default}
+  .fslot.filled{border-style:solid;border-color:rgba(255,244,224,.4);background:rgba(255,244,224,.08)}
+  .fslot.on{border-style:solid;border-color:var(--accent);background:rgba(255,244,224,.12)}
+  .fslot.good{background:var(--lime);color:var(--ink);border-color:var(--ink);animation:pop .4s ease}
+  .fslot.bad{animation:shake .4s ease;border-color:var(--pink)}
+
+  .fixedfrac{font-size:30px;font-weight:700}
+
+  /* the shaded-bar picture */
+  .bars{display:flex;flex-direction:column;gap:14px;width:100%;padding:0 4px}
+  .barwrap{display:flex;flex-direction:column;gap:6px}
+  .bar{
+    display:flex;width:100%;height:56px;
+    border:4px solid var(--ink);border-radius:14px;overflow:hidden;
+    background:rgba(255,244,224,.07);
+  }
+  .bar.pickable{cursor:pointer}
+  .bar.pickable:active{transform:scale(.98)}
+  .seg{flex:1;border-right:3px solid var(--ink)}
+  .seg:last-child{border-right:none}
+  .seg.on{background:var(--accent);animation:seed .3s ease backwards}
+  .barlab{
+    text-align:center;font-size:14px;font-weight:600;
+    color:rgba(255,244,224,.45);
+  }
+  .barwrap.win .bar{border-color:var(--lime);box-shadow:0 0 0 4px rgba(198,241,53,.3)}
+  .barwrap.nope{animation:shake .4s ease}
+
   /* keypad */
   .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:none}
   .key{
@@ -264,6 +314,10 @@
             <div class="sym">÷</div>
             <div class="txt">Sharing<small>fair plates</small></div>
           </div>
+          <div class="op wide" data-op="½" role="button">
+            <div class="sym">½</div>
+            <div class="txt">Fractions<small>parts of a whole</small></div>
+          </div>
         </div>
       </div>
 
@@ -297,6 +351,8 @@
         <svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" fill="none" stroke="#FFF4E0" stroke-width="2.2"/><circle cx="12" cy="12" r="3" fill="#FFF4E0"/></svg>
       </button>
     </div>
+
+    <p class="prompt" id="prompt"></p>
 
     <div class="sum" id="sum"></div>
 
@@ -386,7 +442,12 @@ var STR = {
     mAdd:"{a} and {b} put together",
     mSub:"take {b} away from {a}",
     mMul:"{a} rows of {b}",
-    mDiv:"{a} shared onto {b} plates"
+    mDiv:"{a} shared onto {b} plates",
+    opFrac:["Fractions","parts of a whole"],
+    fName:"Which fraction is shaded?",
+    fCompare:"Tap the bigger one.",
+    fAdd:"Add them together.",
+    fTiers:[["Small","halves, thirds, quarters"],["Medium","up to sixths"],["Big","up to twelfths"]]
   },
   tr: {
     skill:"Bir konu seç",
@@ -410,7 +471,12 @@ var STR = {
     mAdd:"{a} ile {b} bir arada",
     mSub:"{a} sayısından {b} çıkar",
     mMul:"{a} sıra, her sırada {b} tane",
-    mDiv:"{a} tane, {b} tabağa paylaştırıldı"
+    mDiv:"{a} tane, {b} tabağa paylaştırıldı",
+    opFrac:["Kesirler","bütünün parçaları"],
+    fName:"Boyalı kısım hangi kesir?",
+    fCompare:"Büyük olana dokun.",
+    fAdd:"İkisini topla.",
+    fTiers:[["Küçük","yarım, üçte, çeyrek"],["Orta","altıda bire kadar"],["Büyük","on ikide bire kadar"]]
   }
 };
 var T = STR[LANG];
@@ -435,7 +501,8 @@ function show(id){
   });
 }
 
-var ACCENT = { "+":"var(--lime)", "−":"var(--pink)", "×":"var(--sky)", "÷":"var(--tangerine)" };
+var ACCENT = { "+":"var(--lime)", "−":"var(--pink)", "×":"var(--sky)",
+               "÷":"var(--tangerine)", "½":"#B892FF" };
 
 /* ---------------- Sound ---------------- */
 var actx=null;
@@ -482,6 +549,240 @@ function makeQuestion(){
     a = d*q2; b = d; ans = q2;
   }
   return { a:a, b:b, op:op, ans:ans };
+}
+
+/* ---------------- Fractions ----------------
+   Three question shapes, mixed through the round:
+     name     — a shaded bar, write the fraction
+     compare  — two bars, tap the bigger
+     add      — same denominator, find the numerator
+   Denominators are kept coprime with the numerator so the
+   fraction as drawn is already in lowest terms. That way there
+   is exactly one right answer and no argument about 2/4 vs 1/2. */
+
+function gcd(a,b){ while(b){ var t=b; b=a%b; a=t; } return a; }
+
+function fracDenoms(){
+  var t = state.tier;
+  return t===1 ? [2,3,4] : t===2 ? [2,3,4,5,6] : [2,3,4,5,6,8,10,12];
+}
+
+function makeFraction(){
+  var kind = pick(["name","compare","add"]);
+  var pool = fracDenoms();
+
+  if (kind === "name"){
+    var d, n, guard = 0;
+    do {
+      d = pick(pool);
+      n = rand(1, d-1);
+      guard++;
+    } while (gcd(n,d) !== 1 && guard < 60);
+    return { kind:"name", n:n, d:d, label:n + "/" + d, ansText:n + "/" + d };
+  }
+
+  if (kind === "compare"){
+    var d1 = pick(pool), d2 = pick(pool);
+    var n1 = rand(1, d1-1), n2 = rand(1, d2-1);
+    var g = 0;
+    while (Math.abs(n1/d1 - n2/d2) < 0.09 && g++ < 60){
+      d2 = pick(pool); n2 = rand(1, d2-1);
+    }
+    if (n1/d1 === n2/d2) n2 = Math.max(1, n2 - 1);
+    return {
+      kind:"compare", n:n1, d:d1, n2:n2, d2:d2,
+      bigger: (n1/d1 > n2/d2) ? 0 : 1,
+      label: n1+"/"+d1+" vs "+n2+"/"+d2,
+      ansText: (n1/d1 > n2/d2 ? n1+"/"+d1 : n2+"/"+d2)
+    };
+  }
+
+  // add: same denominator, proper result, result already lowest terms
+  var dd, a1, a2, gg = 0;
+  do {
+    dd = pick(pool.filter(function(x){ return x >= 3; }) );
+    if (!dd) dd = 4;
+    a1 = rand(1, dd-2);
+    a2 = rand(1, dd-1-a1);
+    gg++;
+  } while ((a1+a2 >= dd || gcd(a1+a2, dd) !== 1) && gg < 80);
+  if (a1+a2 >= dd){ dd = 5; a1 = 1; a2 = 2; }
+  return {
+    kind:"add", n:a1, n2:a2, d:dd, ans:a1+a2,
+    label: a1+"/"+dd+" + "+a2+"/"+dd,
+    ansText: (a1+a2)+"/"+dd
+  };
+}
+
+function bar(n, d, cls){
+  var segs = "";
+  for (var i=0;i<d;i++){
+    segs += '<div class="seg'+(i<n?" on":"")+'" style="animation-delay:'+(i*0.04)+'s"></div>';
+  }
+  return '<div class="bar '+(cls||"")+'">'+segs+'</div>';
+}
+
+function renderFraction(){
+  var q = state.q;
+  $("prompt").textContent =
+    q.kind === "name" ? T.fName : q.kind === "compare" ? T.fCompare : T.fAdd;
+
+  if (q.kind === "compare"){
+    $("sum").innerHTML = "";
+    $("inner").innerHTML =
+      '<div class="bars">'
+      + '<div class="barwrap" data-i="0">' + bar(q.n,  q.d,  "pickable") + '</div>'
+      + '<div class="barwrap" data-i="1">' + bar(q.n2, q.d2, "pickable") + '</div>'
+      + '</div>';
+    $("pad").style.display = "none";
+    $("model").classList.remove("hidden");   // the bars *are* the question
+    document.querySelectorAll(".barwrap").forEach(function(w){
+      w.addEventListener("click", function(){ pickBar(Number(w.dataset.i), w); });
+    });
+    return;
+  }
+
+  $("pad").style.display = "";
+
+  if (q.kind === "name"){
+    $("sum").innerHTML =
+      '<span class="frac">'
+      + '<span class="fslot on" id="slotN"></span>'
+      + '<span class="fbar"></span>'
+      + '<span class="fslot" id="slotD"></span>'
+      + '</span>';
+    state.focus = "n";
+    $("slotN").addEventListener("click", function(){ setFocus("n"); });
+    $("slotD").addEventListener("click", function(){ setFocus("d"); });
+    $("inner").innerHTML = '<div class="bars"><div class="barwrap">'
+      + bar(q.n, q.d) + '</div></div>';
+    $("model").classList.remove("hidden");   // the picture is the question
+    return;
+  }
+
+  // add
+  $("sum").innerHTML =
+      fixedFrac(q.n, q.d)
+    + '<span class="o">+</span>'
+    + fixedFrac(q.n2, q.d)
+    + '<span class="o">=</span>'
+    + '<span class="frac">'
+    + '<span class="fslot on" id="slotN"></span>'
+    + '<span class="fbar"></span>'
+    + '<span class="fslot fixed">' + q.d + '</span>'
+    + '</span>';
+  state.focus = "n";
+  $("inner").innerHTML = '<div class="bars">'
+    + '<div class="barwrap">' + bar(q.n, q.d) + '</div>'
+    + '<div class="barwrap">' + bar(q.n2, q.d) + '</div>'
+    + '</div>';
+  $("model").classList.toggle("hidden", !state.aid);
+}
+
+function fixedFrac(n,d){
+  return '<span class="frac fixedfrac"><span>'+n+'</span>'
+       + '<span class="fbar"></span><span>'+d+'</span></span>';
+}
+
+function setFocus(which){
+  state.focus = which;
+  var sn = $("slotN"), sd = $("slotD");
+  if (sn) sn.classList.toggle("on", which === "n");
+  if (sd) sd.classList.toggle("on", which === "d");
+}
+
+function typeFraction(k){
+  if (state.locked) return;
+  var key = state.focus === "n" ? "entry" : "entryD";
+
+  if (k === "del"){
+    state[key] = (state[key] || "").slice(0,-1);
+    blip(300,.07);
+  } else if (k === "go"){
+    checkFraction();
+    return;
+  } else {
+    if ((state[key] || "").length >= 2) return;
+    state[key] = (state[key] || "") + k;
+    blip(520 + Number(k)*22, .07);
+    // typing the numerator on a two-slot question hops to the denominator
+    if (state.q.kind === "name" && state.focus === "n" && state.entry.length >= 1){
+      setTimeout(function(){ setFocus("d"); }, 160);
+    }
+  }
+
+  var sn = $("slotN"), sd = $("slotD");
+  if (sn){ sn.textContent = state.entry || ""; sn.classList.toggle("filled", !!state.entry); }
+  if (sd){ sd.textContent = state.entryD || ""; sd.classList.toggle("filled", !!state.entryD); }
+}
+
+function checkFraction(){
+  var q = state.q, ok;
+  if (q.kind === "name"){
+    if (!state.entry || !state.entryD) return;
+    ok = Number(state.entry) === q.n && Number(state.entryD) === q.d;
+  } else {
+    if (!state.entry) return;
+    ok = Number(state.entry) === q.ans;
+  }
+  gradeFraction(ok);
+}
+
+function pickBar(idx, node){
+  if (state.locked) return;
+  gradeFraction(idx === state.q.bigger, node);
+}
+
+function gradeFraction(ok, node){
+  var slots = [$("slotN"), $("slotD")].filter(Boolean);
+
+  if (ok){
+    state.locked = true;
+    slots.forEach(function(x){ x.classList.add("good"); });
+    if (node) node.classList.add("win");
+    blip(680,.13);
+    setTimeout(function(){ blip(900,.18); }, 100);
+
+    var firstGo = state.tries === 0;
+    state.marks[state.step] = firstGo;
+    if (firstGo) state.right++; else state.missed.push(state.q);
+    $("note").textContent = firstGo ? pick(T.good) : T.late;
+    state.step++;
+    drawPips();
+    setTimeout(newTurn, 1050);
+    return;
+  }
+
+  state.tries++;
+  if (node){
+    node.classList.add("nope");
+    setTimeout(function(){ node.classList.remove("nope"); }, 430);
+  }
+  slots.forEach(function(x){ x.classList.add("bad"); });
+  blip(200,.2);
+  setTimeout(function(){
+    slots.forEach(function(x){ x.classList.remove("bad"); });
+    state.entry = ""; state.entryD = "";
+    slots.forEach(function(x){ x.textContent = ""; x.classList.remove("filled"); });
+    setFocus("n");
+  }, 430);
+
+  $("note").classList.add("bad");
+  if (state.tries === 1){
+    $("note").textContent = T.miss1;
+    state.aid = true;
+    $("model").classList.remove("hidden");
+  } else if (state.tries === 2){
+    $("note").textContent = T.miss2;
+  } else {
+    $("note").textContent = fill(T.miss3, { n:state.q.ansText });
+    state.locked = true;
+    state.marks[state.step] = false;
+    state.missed.push(state.q);
+    state.step++;
+    drawPips();
+    setTimeout(newTurn, 2200);
+  }
 }
 
 /* ---------------- The pictures ----------------
@@ -557,10 +858,23 @@ function summary(text){
 function newTurn(){
   if (state.step >= ROUND){ finish(); return; }
 
-  state.q = makeQuestion();
   state.entry = "";
+  state.entryD = "";
   state.locked = false;
   state.tries = 0;
+  $("note").textContent = "";
+  $("note").classList.remove("bad");
+
+  if (state.op === "½"){
+    state.q = makeFraction();
+    renderFraction();
+    drawPips();
+    return;
+  }
+
+  state.q = makeQuestion();
+  $("prompt").textContent = "";
+  $("pad").style.display = "";
 
   $("sum").innerHTML =
       '<span>'+state.q.a+'</span>'
@@ -571,8 +885,6 @@ function newTurn(){
 
   drawModel(state.q);
   $("model").classList.toggle("hidden", !state.aid);
-  $("note").textContent = "";
-  $("note").classList.remove("bad");
   drawPips();
 }
 
@@ -589,6 +901,7 @@ function drawPips(){
 
 function typeKey(k){
   if (state.locked) return;
+  if (state.op === "½"){ typeFraction(k); return; }
 
   if (k === "del"){
     state.entry = state.entry.slice(0,-1);
@@ -671,11 +984,14 @@ function finish(){
   } else {
     var seen = {}, rows = "";
     state.missed.forEach(function(q){
-      var key = q.a + q.op + q.b;
+      var key = q.label ? q.label : (q.a + q.op + q.b);
       if (seen[key]) return;
       seen[key] = 1;
-      rows += '<div class="fact"><span>' + q.a + ' ' + q.op + ' ' + q.b
-            + '</span><b>' + q.ans + '</b></div>';
+      rows += '<div class="fact"><span>'
+            + (q.label ? q.label : q.a + ' ' + q.op + ' ' + q.b)
+            + '</span><b>'
+            + (q.ansText ? q.ansText : q.ans)
+            + '</b></div>';
     });
     box.innerHTML = '<p>' + T.practise + '</p>' + rows;
   }
@@ -695,9 +1011,18 @@ $("ops").addEventListener("click", function(e){
   var o = e.target.closest(".op");
   if (!o) return;
   state.op = o.dataset.op;
+  paintTiers();
   blip(560,.12);
   begin();
 });
+
+/* fractions describe their sizes differently from whole numbers */
+function paintTiers(){
+  var set = (state.op === "\u00bd") ? T.fTiers : T.tiers;
+  document.querySelectorAll("#tiers .tier").forEach(function(node,i){
+    node.innerHTML = set[i][0] + "<small>" + set[i][1] + "</small>";
+  });
+}
 
 $("tiers").addEventListener("click", function(e){
   var t = e.target.closest(".tier");
@@ -725,6 +1050,11 @@ $("pad").addEventListener("click", function(e){
 });
 
 $("peek").addEventListener("click", function(){
+  // on "name" and "compare" the bars *are* the question — never hide them
+  if (state.op === "\u00bd" && state.q && state.q.kind !== "add"){
+    blip(300,.1);
+    return;
+  }
   state.aid = !state.aid;
   $("model").classList.toggle("hidden", !state.aid);
   blip(state.aid ? 620 : 380, .1);
@@ -746,8 +1076,9 @@ $("toHub").addEventListener("click", function(){ location.href = withLang("index
   var labels = document.querySelectorAll(".label");
   [T.skill, T.size, T.pics].forEach(function(t,i){ if (labels[i]) labels[i].textContent = t; });
 
+  var opTexts = T.ops.concat([T.opFrac]);
   document.querySelectorAll("#ops .txt").forEach(function(node,i){
-    node.innerHTML = T.ops[i][0] + "<small>" + T.ops[i][1] + "</small>";
+    node.innerHTML = opTexts[i][0] + "<small>" + opTexts[i][1] + "</small>";
   });
   document.querySelectorAll("#tiers .tier").forEach(function(node,i){
     node.innerHTML = T.tiers[i][0] + "<small>" + T.tiers[i][1] + "</small>";

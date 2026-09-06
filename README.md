@@ -65,6 +65,27 @@ The four operations, each paired with the visual model that makes it click:
 | **−** | Çıkarma | One group with some dots crossed out. |
 | **×** | Çarpma | A rectangular array — rows of columns. The model that stops multiplication being pure memorisation. |
 | **÷** | Bölme | A total shared out onto equal plates. |
+| **½** | Kesirler | Shaded bars divided into equal parts. |
+
+### Fractions (the advanced level)
+
+Three question shapes are mixed through the round:
+
+- **Name it** — a bar with some parts shaded; type the numerator and
+  denominator. Typing the top number hops focus to the bottom one
+  automatically.
+- **Which is bigger** — two bars, tap the larger. No numerals involved, so it
+  works before a kid can compute anything.
+- **Add them** — same denominator, find the numerator. The denominator stays
+  fixed on screen, which is itself the lesson: adding fifths gives you fifths.
+
+Every generated fraction is already in lowest terms, so there is exactly one
+right answer and no argument about whether 2/4 should have been 1/2. Sums stay
+proper — no answers above 1 — and the two bars in a comparison are never
+closer than about a tenth apart, which keeps it readable at a glance.
+
+On the "name" and "which is bigger" questions the picture *is* the question,
+so the eye button won't hide it.
 
 Three number ranges and a toggle for whether the picture shows by default.
 Answers go in by keypad, not multiple choice, so there is nothing to guess
@@ -124,6 +145,11 @@ in unchanged.
 
 - `var ROUND = 10;` — questions per round.
 - `makeQuestion()` holds the number ranges for each tier and operation.
+- `fracDenoms()` holds the denominators offered at each tier — currently
+  2/3/4, then up to 6, then up to 12.
+- `makeFraction()` picks between the three question shapes with equal weight.
+  Change the `pick([...])` array to bias it, e.g. repeat `"compare"` to make
+  comparisons more common for a younger kid.
 - `tooMany(n)` caps how many dots get drawn before the picture falls back to a
   text description. Raise it on tablets.
 - Three wrong tries reveals the answer; change the `state.tries === 2` branch
